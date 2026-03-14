@@ -19,6 +19,8 @@ func RegisterAll(s *server.MCPServer) {
 	s.AddTool(runCellTool, handleRunCell)
 	s.AddTool(classifyResultTool, handleClassifyResult)
 	s.AddTool(reportMatrixTool, handleReportMatrix)
+	s.AddTool(runBatchTool, handleRunBatch)
+	s.AddTool(pollBatchTool, handlePollBatch)
 }
 
 var initMatrixTool = mcp.NewTool("init_matrix",
@@ -325,6 +327,269 @@ func readRunDetails(dir string) (*RunDetails, error) {
 		return nil, err
 	}
 	return &rd, nil
+}
+
+var runBatchTool = mcp.NewTool("run_batch",
+	mcp.WithDescription("Launch multiple stress test cells in parallel tmux sessions"),
+	mcp.WithArray("repos", mcp.Required(), mcp.Description("Repo IDs from the manifest to include"), mcp.Items(map[string]any{"type": "string"})),
+	mcp.WithArray("tasks", mcp.Required(), mcp.Description("Task IDs from the manifest to include"), mcp.Items(map[string]any{"type": "string"})),
+	mcp.WithString("working_directory", mcp.Description("Directory for campaign state (default: cwd)")),
+	mcp.WithString("bead_id", mcp.Description("Parent bead ID for linking failure beads")),
+)
+
+var pollBatchTool = mcp.NewTool("poll_batch",
+	mcp.WithDescription("Wait for all active stress test tmux sessions to complete and collect results"),
+	mcp.WithString("working_directory", mcp.Description("Directory containing campaign state (default: cwd)")),
+	mcp.WithString("bead_id", mcp.Description("Parent bead ID for linking failure beads")),
+	mcp.WithString("timeout", mcp.Description("Max wait duration (e.g. '30m', '1h'); default: '30m'")),
+)
+
+// toStringSlice converts an interface{} (typically []interface{} from JSON) to []string.
+func toStringSlice(v interface{}) []string {
+	if v == nil {
+		return nil
+	}
+	arr, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(arr))
+	for _, item := range arr {
+		if s, ok := item.(string); ok {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+func handleRunBatch(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	dir := resolveDir(req)
+	beadID := req.GetString("bead_id", "")
+
+	repos := req.GetStringSlice("repos", nil)
+	tasks := req.GetStringSlice("tasks", nil)
+
+	// Fallback: GetStringSlice may return nil if the JSON array contains non-string types
+	if repos == nil {
+		args := req.GetArguments()
+		repos = toStringSlice(args["repos"])
+	}
+	if tasks == nil {
+		args := req.GetArguments()
+		tasks = toStringSlice(args["tasks"])
+	}
+
+	if len(repos) == 0 || len(tasks) == 0 {
+		return mcp.NewToolResultText("missing required fields: repos, tasks (both must be non-empty arrays)"), nil
+	}
+
+	// Load manifest cache
+	manifestData, err := os.ReadFile(filepath.Join(dir, ".intermix-manifest.json"))
+	if err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("manifest cache not found: %v — run init_matrix first", err)), nil
+	}
+	var manifest Manifest
+	if err := json.Unmarshal(manifestData, &manifest); err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("manifest parse error: %v", err)), nil
+	}
+
+	// Build cells with repo filter
+	cells := BuildBatchCells(&manifest, repos)
+
+	// Further filter by task IDs
+	taskSet := make(map[string]bool, len(tasks))
+	for _, t := range tasks {
+		taskSet[t] = true
+	}
+	var filtered []BatchCell
+	for _, c := range cells {
+		if taskSet[c.Task.ID] {
+			filtered = append(filtered, c)
+		}
+	}
+	cells = filtered
+
+	if len(cells) == 0 {
+		return mcp.NewToolResultText("no cells match the given repos and tasks — check manifest IDs"), nil
+	}
+
+	// Check already-completed cells
+	state, _ := ReconstructStateFromCellsDir(dir)
+	if state != nil {
+		var remaining []BatchCell
+		for _, c := range cells {
+			key := c.Repo.ID + ":" + c.Task.ID
+			if !state.CompletedCells[key] {
+				remaining = append(remaining, c)
+			}
+		}
+		if len(remaining) < len(cells) {
+			cells = remaining
+		}
+	}
+
+	if len(cells) == 0 {
+		return mcp.NewToolResultText("all requested cells are already completed"), nil
+	}
+
+	// Determine default timeout from config
+	defaultTimeout := 5 * time.Minute
+	if state != nil && state.Config.Timeout != "" {
+		if parsed, err := time.ParseDuration(state.Config.Timeout); err == nil {
+			defaultTimeout = parsed
+		}
+	}
+
+	// Launch all cells
+	results := RunBatch(ctx, cells, dir, defaultTimeout)
+
+	// Save batch state for poll_batch
+	batchState := batchFileState{
+		BeadID:  beadID,
+		Results: results,
+	}
+	batchData, err := json.MarshalIndent(batchState, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("marshal batch state: %v", err)), nil
+	}
+	// Atomic write: temp file + rename to prevent partial reads by poll_batch.
+	tmpPath := filepath.Join(dir, ".intermix-batch.json.tmp")
+	if err := os.WriteFile(tmpPath, batchData, 0644); err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("write batch state: %v", err)), nil
+	}
+	if err := os.Rename(tmpPath, filepath.Join(dir, ".intermix-batch.json")); err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("rename batch state: %v", err)), nil
+	}
+
+	// Build summary
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Launched %d cells in parallel tmux sessions.\n\n", len(cells)))
+
+	spawned := 0
+	failed := 0
+	for _, r := range results {
+		if r.Error != nil {
+			sb.WriteString(fmt.Sprintf("  FAILED  %s: %v\n", r.Cell.ID(), r.Error))
+			failed++
+		} else {
+			sb.WriteString(fmt.Sprintf("  RUNNING %s (session: %s)\n", r.Cell.ID(), r.SessionName))
+			spawned++
+		}
+	}
+
+	sb.WriteString(fmt.Sprintf("\nSpawned: %d | Failed to launch: %d\n", spawned, failed))
+	sb.WriteString("\nNext: call poll_batch to wait for completion and collect results.")
+
+	return mcp.NewToolResultText(sb.String()), nil
+}
+
+// batchFileState is persisted to .intermix-batch.json between run_batch and poll_batch.
+type batchFileState struct {
+	BeadID  string        `json:"bead_id,omitempty"`
+	Results []BatchResult `json:"results"`
+}
+
+func handlePollBatch(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	dir := resolveDir(req)
+	beadID := req.GetString("bead_id", "")
+	timeoutStr := req.GetString("timeout", "30m")
+
+	timeout, err := time.ParseDuration(timeoutStr)
+	if err != nil {
+		timeout = 30 * time.Minute
+	}
+
+	// Load batch state
+	batchData, err := os.ReadFile(filepath.Join(dir, ".intermix-batch.json"))
+	if err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("no batch state found: %v — run run_batch first", err)), nil
+	}
+	var batchState batchFileState
+	if err := json.Unmarshal(batchData, &batchState); err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("batch state parse error: %v", err)), nil
+	}
+
+	if beadID == "" {
+		beadID = batchState.BeadID
+	}
+
+	// Poll all sessions
+	PollBatch(ctx, batchState.Results, dir, timeout)
+
+	// Process results: harvest evidence and create debug beads for failures
+	debugBeadMap := make(map[string]string) // cellKey -> beadID
+	var debugBeadList []string
+
+	for _, r := range batchState.Results {
+		if r.CellResult == nil {
+			continue
+		}
+		cr := *r.CellResult
+
+		// Emit ic event for each cell
+		EmitCellEvent(cr, beadID)
+
+		// For non-success: harvest evidence and create debug bead
+		if cr.Outcome != OutcomeSuccess && cr.Outcome != OutcomeSkipped {
+			// Harvest evidence (best-effort)
+			evidenceExcerpt := ""
+			if r.SessionName != "" {
+				if evPath, err := HarvestEvidence(dir, r.Cell.ID(), r.SessionName); err == nil {
+					if data, err := os.ReadFile(evPath); err == nil {
+						excerpt := string(data)
+						if len(excerpt) > 2000 {
+							excerpt = excerpt[len(excerpt)-2000:]
+						}
+						evidenceExcerpt = excerpt
+					}
+				}
+			}
+
+			// Create debug bead (best-effort)
+			if beadID != "" {
+				dbID := CreateDebugBead(cr, beadID, evidenceExcerpt, r.PaneCapture)
+				if dbID != "" {
+					cellKey := cr.Repo + ":" + cr.Task
+					debugBeadMap[cellKey] = dbID
+					debugBeadList = append(debugBeadList, fmt.Sprintf("%s (%s)", dbID, r.Cell.ID()))
+				}
+			}
+		}
+	}
+
+	// Generate report from cells directory
+	state, err := ReconstructStateFromCellsDir(dir)
+	if err != nil {
+		return mcp.NewToolResultText(fmt.Sprintf("state reconstruction error: %v", err)), nil
+	}
+
+	report := GenerateReport(state.Results, nil)
+
+	// Create pattern beads for failure clusters with >=2 cells
+	if beadID != "" {
+		CreatePatternBeads(report.FailureClusters, beadID, debugBeadMap)
+	}
+
+	// Emit campaign event
+	EmitCampaignEvent(report, state.Config.Name, beadID)
+
+	// Clean up batch file
+	os.Remove(filepath.Join(dir, ".intermix-batch.json"))
+
+	// Build output
+	var sb strings.Builder
+	sb.WriteString(FormatReport(report))
+	sb.WriteString("\n")
+	sb.WriteString(FormatHeatmap(state.Results))
+
+	if len(debugBeadList) > 0 {
+		sb.WriteString("\n## Debug Beads Created\n\n")
+		for _, entry := range debugBeadList {
+			sb.WriteString(fmt.Sprintf("- %s\n", entry))
+		}
+	}
+
+	return mcp.NewToolResultText(sb.String()), nil
 }
 
 // loadPreviousSegment finds results from a specific segment number.

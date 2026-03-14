@@ -1,6 +1,9 @@
 package eval
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestGenerateReport_BasicStats(t *testing.T) {
 	results := []CellResult{
@@ -97,5 +100,81 @@ func TestCompareSegments(t *testing.T) {
 	}
 	if len(d.RegressedCells) != 1 || d.RegressedCells[0] != "cobra:add-endpoint" {
 		t.Errorf("RegressedCells = %v, want [cobra:add-endpoint]", d.RegressedCells)
+	}
+}
+
+func TestFormatHeatmap(t *testing.T) {
+	results := []CellResult{
+		{Repo: "chi", Task: "add-endpoint", Outcome: OutcomeSuccess},
+		{Repo: "chi", Task: "fix-bug", Outcome: OutcomeContextLimit},
+		{Repo: "chi", Task: "refactor", Outcome: OutcomeTimeout},
+		{Repo: "cobra", Task: "add-endpoint", Outcome: OutcomePartial},
+		{Repo: "cobra", Task: "fix-bug", Outcome: OutcomeCrash},
+		{Repo: "cobra", Task: "refactor", Outcome: OutcomeToolFailure},
+		{Repo: "echo", Task: "add-endpoint", Outcome: OutcomeNoProgress},
+		{Repo: "echo", Task: "fix-bug", Outcome: OutcomeSetupFailure},
+		{Repo: "echo", Task: "refactor", Outcome: OutcomeSkipped},
+	}
+
+	out := FormatHeatmap(results)
+
+	// Verify all repo names appear.
+	for _, repo := range []string{"chi", "cobra", "echo"} {
+		if !strings.Contains(out, repo) {
+			t.Errorf("heatmap missing repo %q", repo)
+		}
+	}
+
+	// Verify all task names appear in the header.
+	for _, task := range []string{"add-endpoint", "fix-bug", "refactor"} {
+		if !strings.Contains(out, task) {
+			t.Errorf("heatmap missing task %q", task)
+		}
+	}
+
+	// Verify outcome symbols appear.
+	for _, sym := range []string{"PASS", "CTXL", "TOUT", "PART", "FAIL", "TOOL", "NOPG", "SETU", "SKIP"} {
+		if !strings.Contains(out, sym) {
+			t.Errorf("heatmap missing symbol %q", sym)
+		}
+	}
+
+	// Verify legend line is present.
+	if !strings.Contains(out, "PASS=success") {
+		t.Error("heatmap missing legend")
+	}
+
+	// Verify insertion order: chi should come before cobra, cobra before echo.
+	chiIdx := strings.Index(out, "\nchi")
+	cobraIdx := strings.Index(out, "\ncobra")
+	echoIdx := strings.Index(out, "\necho")
+	if chiIdx >= cobraIdx || cobraIdx >= echoIdx {
+		t.Errorf("repos not in insertion order: chi@%d cobra@%d echo@%d", chiIdx, cobraIdx, echoIdx)
+	}
+}
+
+func TestOutcomeSymbol(t *testing.T) {
+	tests := []struct {
+		outcome string
+		want    string
+	}{
+		{OutcomeSuccess, "PASS"},
+		{OutcomePartial, "PART"},
+		{OutcomeTimeout, "TOUT"},
+		{OutcomeCrash, "FAIL"},
+		{OutcomeToolFailure, "TOOL"},
+		{OutcomeNoProgress, "NOPG"},
+		{OutcomeContextLimit, "CTXL"},
+		{OutcomeSetupFailure, "SETU"},
+		{OutcomeSkipped, "SKIP"},
+		{"unknown_thing", "????"},
+		{OutcomeWrongApproach, "????"},
+	}
+
+	for _, tt := range tests {
+		got := outcomeSymbol(tt.outcome)
+		if got != tt.want {
+			t.Errorf("outcomeSymbol(%q) = %q, want %q", tt.outcome, got, tt.want)
+		}
 	}
 }

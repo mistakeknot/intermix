@@ -6,6 +6,72 @@ import (
 	"testing"
 )
 
+func TestCellJSONLPath(t *testing.T) {
+	dir := t.TempDir()
+	cellsDir := filepath.Join(dir, "cells")
+
+	path := CellJSONLPath(dir, "chi-add-test-1710000000")
+	if path != filepath.Join(cellsDir, "chi-add-test-1710000000.jsonl") {
+		t.Errorf("unexpected path: %s", path)
+	}
+}
+
+func TestCellRunFilePath(t *testing.T) {
+	dir := t.TempDir()
+	path := CellRunFilePath(dir, "chi-add-test-1710000000")
+	expected := filepath.Join(dir, "cells", "chi-add-test-1710000000.run.json")
+	if path != expected {
+		t.Errorf("unexpected path: %s", path)
+	}
+}
+
+func TestReconstructStateFromCellsDir(t *testing.T) {
+	dir := t.TempDir()
+	cellsDir := filepath.Join(dir, "cells")
+	os.MkdirAll(cellsDir, 0755)
+
+	// Write config to main JSONL.
+	cfg := MatrixConfig{
+		Type:                   "config",
+		Name:                   "test",
+		RepoIDs:                []string{"chi", "zod"},
+		TaskIDs:                []string{"add-test"},
+		TotalCells:             2,
+		MaxCells:               100,
+		MaxConsecutiveFailures: 5,
+	}
+	WriteConfig(filepath.Join(dir, "intermix.jsonl"), cfg)
+
+	// Write cell results to per-cell files.
+	cr1 := CellResult{Type: "cell_result", Repo: "chi", Task: "add-test", Outcome: OutcomeSuccess, DurationMs: 1000, TokensUsed: 500}
+	cr2 := CellResult{Type: "cell_result", Repo: "zod", Task: "add-test", Outcome: OutcomeTimeout, DurationMs: 5000, TokensUsed: 200}
+	WriteCellResult(CellJSONLPath(dir, "chi-add-test"), cr1)
+	WriteCellResult(CellJSONLPath(dir, "zod-add-test"), cr2)
+
+	state, err := ReconstructStateFromCellsDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.CellCount != 2 {
+		t.Errorf("expected 2 cells, got %d", state.CellCount)
+	}
+	if state.SuccessCount != 1 {
+		t.Errorf("expected 1 success, got %d", state.SuccessCount)
+	}
+	if state.FailureCount != 1 {
+		t.Errorf("expected 1 failure, got %d", state.FailureCount)
+	}
+	if !state.CompletedCells["chi:add-test"] {
+		t.Error("CompletedCells missing chi:add-test")
+	}
+	if !state.CompletedCells["zod:add-test"] {
+		t.Error("CompletedCells missing zod:add-test")
+	}
+	if state.Config.Name != "test" {
+		t.Errorf("Config.Name: want test, got %s", state.Config.Name)
+	}
+}
+
 func TestReconstructState_Empty(t *testing.T) {
 	// Non-existent file should return empty state, no error.
 	s, err := ReconstructState("/tmp/intermix-test-nonexistent-" + t.Name() + ".jsonl")

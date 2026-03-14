@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -200,6 +202,88 @@ func WriteCellResult(path string, cr CellResult) error {
 	cr.Type = "cell_result"
 	cr.Timestamp = time.Now().UTC().Format(time.RFC3339)
 	return appendJSONL(path, cr)
+}
+
+// CellJSONLPath returns the JSONL path for a specific cell in parallel mode.
+func CellJSONLPath(workDir, cellID string) string {
+	return filepath.Join(workDir, "cells", cellID+".jsonl")
+}
+
+// CellRunFilePath returns the run-details path for a specific cell.
+func CellRunFilePath(workDir, cellID string) string {
+	return filepath.Join(workDir, "cells", cellID+".run.json")
+}
+
+// ReconstructStateFromCellsDir reads the main config from intermix.jsonl
+// and all cell results from cells/*.jsonl files.
+func ReconstructStateFromCellsDir(workDir string) (*MatrixState, error) {
+	// Read config from main file.
+	mainPath := filepath.Join(workDir, "intermix.jsonl")
+	state, err := ReconstructState(mainPath)
+	if err != nil {
+		return nil, fmt.Errorf("reading main config: %w", err)
+	}
+
+	// Walk cells directory for results.
+	cellsDir := filepath.Join(workDir, "cells")
+	entries, err := os.ReadDir(cellsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return state, nil // No cells yet.
+		}
+		return nil, fmt.Errorf("reading cells dir: %w", err)
+	}
+
+	for _, entry := range entries {
+		if !strings.HasSuffix(entry.Name(), ".jsonl") {
+			continue
+		}
+		cellPath := filepath.Join(cellsDir, entry.Name())
+		data, err := os.ReadFile(cellPath)
+		if err != nil {
+			continue
+		}
+		for len(data) > 0 {
+			var line []byte
+			if idx := bytes.IndexByte(data, '\n'); idx >= 0 {
+				line = data[:idx]
+				data = data[idx+1:]
+			} else {
+				line = data
+				data = nil
+			}
+			if len(line) == 0 {
+				continue
+			}
+			if !bytes.Contains(line, []byte(`"type":"cell_result"`)) {
+				continue
+			}
+			var cr CellResult
+			if err := json.Unmarshal(line, &cr); err != nil {
+				continue
+			}
+			state.CellCount++
+			state.TotalDurationMs += cr.DurationMs
+			state.TotalTokens += cr.TokensUsed
+			state.CompletedCells[cr.Repo+":"+cr.Task] = true
+			state.Results = append(state.Results, cr)
+
+			switch cr.Outcome {
+			case OutcomeSuccess:
+				state.SuccessCount++
+				state.ConsecutiveFailures = 0
+			case OutcomePartial:
+				state.PartialCount++
+				state.ConsecutiveFailures = 0
+			case OutcomeSkipped:
+				state.SkippedCount++
+			default:
+				state.FailureCount++
+				state.ConsecutiveFailures++
+			}
+		}
+	}
+	return state, nil
 }
 
 func appendJSONL(path string, v interface{}) error {

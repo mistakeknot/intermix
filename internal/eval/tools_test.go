@@ -2,11 +2,14 @@ package eval
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
 func TestHandleInitMatrix(t *testing.T) {
@@ -208,5 +211,117 @@ defaults:
 	state, _ := ReconstructState(jsonlPath)
 	if state.SuccessCount != 1 {
 		t.Errorf("success count: got %d, want 1", state.SuccessCount)
+	}
+}
+
+func TestToolsRegistered(t *testing.T) {
+	s := server.NewMCPServer("intermix-test", "0.0.1")
+	RegisterAll(s)
+
+	// Send a tools/list JSON-RPC request
+	listReq := `{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}`
+	resp := s.HandleMessage(context.Background(), json.RawMessage(listReq))
+
+	// Marshal response to inspect
+	data, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("marshal response: %v", err)
+	}
+	respStr := string(data)
+
+	expected := []string{
+		"init_matrix",
+		"run_cell",
+		"classify_result",
+		"report_matrix",
+		"run_batch",
+		"poll_batch",
+	}
+	for _, name := range expected {
+		if !strings.Contains(respStr, `"`+name+`"`) {
+			t.Errorf("tool %q not found in tools/list response", name)
+		}
+	}
+}
+
+func TestHandleRunBatch_MissingArgs(t *testing.T) {
+	dir := t.TempDir()
+
+	req := mcp.CallToolRequest{}
+	req.Params.Arguments = map[string]interface{}{
+		"working_directory": dir,
+	}
+
+	result, err := handleRunBatch(context.Background(), req)
+	if err != nil {
+		t.Fatalf("handleRunBatch error: %v", err)
+	}
+
+	text := result.Content[0].(mcp.TextContent).Text
+	if !strings.Contains(text, "missing required fields") {
+		t.Errorf("expected missing-fields error, got: %s", text)
+	}
+}
+
+func TestHandleRunBatch_NoManifest(t *testing.T) {
+	dir := t.TempDir()
+
+	req := mcp.CallToolRequest{}
+	req.Params.Arguments = map[string]interface{}{
+		"working_directory": dir,
+		"repos":             []interface{}{"repo-a"},
+		"tasks":             []interface{}{"task-a"},
+	}
+
+	result, err := handleRunBatch(context.Background(), req)
+	if err != nil {
+		t.Fatalf("handleRunBatch error: %v", err)
+	}
+
+	text := result.Content[0].(mcp.TextContent).Text
+	if !strings.Contains(text, "manifest cache not found") {
+		t.Errorf("expected manifest error, got: %s", text)
+	}
+}
+
+func TestHandlePollBatch_NoBatchState(t *testing.T) {
+	dir := t.TempDir()
+
+	req := mcp.CallToolRequest{}
+	req.Params.Arguments = map[string]interface{}{
+		"working_directory": dir,
+	}
+
+	result, err := handlePollBatch(context.Background(), req)
+	if err != nil {
+		t.Fatalf("handlePollBatch error: %v", err)
+	}
+
+	text := result.Content[0].(mcp.TextContent).Text
+	if !strings.Contains(text, "no batch state found") {
+		t.Errorf("expected no-batch-state error, got: %s", text)
+	}
+}
+
+func TestToStringSlice(t *testing.T) {
+	tests := []struct {
+		name string
+		in   interface{}
+		want int
+	}{
+		{"nil", nil, 0},
+		{"empty", []interface{}{}, 0},
+		{"strings", []interface{}{"a", "b", "c"}, 3},
+		{"mixed", []interface{}{"a", 42, "b"}, 2},
+		{"wrong type", "not-array", 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := toStringSlice(tt.in)
+			if len(got) != tt.want {
+				t.Errorf("toStringSlice(%v): got %d items, want %d", tt.in, len(got), tt.want)
+			}
+		})
 	}
 }

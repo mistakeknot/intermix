@@ -17,6 +17,7 @@ type Report struct {
 	ByOutcome       map[string]int
 	FailureClusters []FailureCluster
 	Delta           *DeltaReport
+	Results         []CellResult
 }
 
 // RepoStats tracks per-repo pass/fail counts.
@@ -50,6 +51,7 @@ func GenerateReport(results []CellResult, prevResults []CellResult) *Report {
 		ByRepo:    make(map[string]*RepoStats),
 		ByTask:    make(map[string]*TaskStats),
 		ByOutcome: make(map[string]int),
+		Results:   results,
 	}
 
 	for _, cr := range results {
@@ -173,6 +175,13 @@ func FormatReport(r *Report) string {
 	b.WriteString(fmt.Sprintf("- **Failures:** %d\n", r.FailureCount))
 	b.WriteString(fmt.Sprintf("- **Pass rate:** %.1f%%\n", r.PassRate))
 
+	// Heatmap.
+	if len(r.Results) > 0 {
+		b.WriteString("\n## Heatmap\n\n```\n")
+		b.WriteString(FormatHeatmap(r.Results))
+		b.WriteString("```\n")
+	}
+
 	// Outcome distribution.
 	if len(r.ByOutcome) > 0 {
 		b.WriteString("\n## Outcome Distribution\n\n")
@@ -248,6 +257,100 @@ func FormatReport(r *Report) string {
 			}
 		}
 	}
+
+	return b.String()
+}
+
+// outcomeSymbol maps an outcome constant to a 4-character symbol for heatmap display.
+func outcomeSymbol(outcome string) string {
+	switch outcome {
+	case OutcomeSuccess:
+		return "PASS"
+	case OutcomePartial:
+		return "PART"
+	case OutcomeTimeout:
+		return "TOUT"
+	case OutcomeCrash:
+		return "FAIL"
+	case OutcomeToolFailure:
+		return "TOOL"
+	case OutcomeNoProgress:
+		return "NOPG"
+	case OutcomeContextLimit:
+		return "CTXL"
+	case OutcomeSetupFailure:
+		return "SETU"
+	case OutcomeSkipped:
+		return "SKIP"
+	default:
+		return "????"
+	}
+}
+
+// FormatHeatmap generates an ASCII grid showing pass/fail per repo x task.
+// Repos and tasks are collected in insertion order from results.
+func FormatHeatmap(results []CellResult) string {
+	// Collect unique repos and tasks in insertion order.
+	var repos []string
+	repoSeen := make(map[string]bool)
+	var tasks []string
+	taskSeen := make(map[string]bool)
+
+	// Build lookup: repo+task -> outcome symbol.
+	grid := make(map[string]string)
+	for _, cr := range results {
+		if !repoSeen[cr.Repo] {
+			repoSeen[cr.Repo] = true
+			repos = append(repos, cr.Repo)
+		}
+		if !taskSeen[cr.Task] {
+			taskSeen[cr.Task] = true
+			tasks = append(tasks, cr.Task)
+		}
+		grid[cr.Repo+"\x00"+cr.Task] = outcomeSymbol(cr.Outcome)
+	}
+
+	// Determine column widths: max of task name length and symbol width (4).
+	repoColWidth := 0
+	for _, repo := range repos {
+		if len(repo) > repoColWidth {
+			repoColWidth = len(repo)
+		}
+	}
+
+	taskColWidths := make([]int, len(tasks))
+	for i, task := range tasks {
+		w := len(task)
+		if w < 4 {
+			w = 4
+		}
+		taskColWidths[i] = w
+	}
+
+	var b strings.Builder
+
+	// Header row.
+	b.WriteString(fmt.Sprintf("%-*s", repoColWidth, ""))
+	for i, task := range tasks {
+		b.WriteString(fmt.Sprintf("  %-*s", taskColWidths[i], task))
+	}
+	b.WriteByte('\n')
+
+	// Data rows.
+	for _, repo := range repos {
+		b.WriteString(fmt.Sprintf("%-*s", repoColWidth, repo))
+		for i, task := range tasks {
+			sym := grid[repo+"\x00"+task]
+			if sym == "" {
+				sym = "    "
+			}
+			b.WriteString(fmt.Sprintf("  %-*s", taskColWidths[i], sym))
+		}
+		b.WriteByte('\n')
+	}
+
+	// Legend.
+	b.WriteString("\nPASS=success PART=partial TOUT=timeout FAIL=crash TOOL=tool_failure NOPG=no_progress CTXL=context_limit SETU=setup_failure SKIP=skipped\n")
 
 	return b.String()
 }

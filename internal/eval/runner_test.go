@@ -181,3 +181,102 @@ func TestRunSetup(t *testing.T) {
 		t.Errorf("expected error from failing setup command")
 	}
 }
+
+func TestBuildTmuxSessionName(t *testing.T) {
+	tests := []struct {
+		name   string
+		repoID string
+		taskID string
+		want   string
+	}{
+		{
+			name:   "simple IDs",
+			repoID: "chi",
+			taskID: "refactor",
+			want:   "intermix-chi_refactor-claude",
+		},
+		{
+			name:   "hyphenated repo ID",
+			repoID: "my-repo",
+			taskID: "task1",
+			want:   "intermix-my_repo_task1-claude",
+		},
+		{
+			name:   "hyphenated task ID",
+			repoID: "zod",
+			taskID: "add-tests",
+			want:   "intermix-zod_add_tests-claude",
+		},
+		{
+			name:   "both hyphenated",
+			repoID: "my-cool-repo",
+			taskID: "fix-bug-123",
+			want:   "intermix-my_cool_repo_fix_bug_123-claude",
+		},
+		{
+			name:   "no hyphens",
+			repoID: "click",
+			taskID: "docs",
+			want:   "intermix-click_docs-claude",
+		},
+		{
+			name:   "collision prevention",
+			repoID: "chi-v2",
+			taskID: "test",
+			want:   "intermix-chi_v2_test-claude",
+		},
+		{
+			name:   "empty strings",
+			repoID: "",
+			taskID: "",
+			want:   "intermix-_-claude",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := BuildTmuxSessionName(tc.repoID, tc.taskID)
+			if got != tc.want {
+				t.Errorf("BuildTmuxSessionName(%q, %q) = %q, want %q", tc.repoID, tc.taskID, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestBuildSkaffenCommand(t *testing.T) {
+	tests := []struct {
+		name   string
+		prompt string
+		want   []string
+	}{
+		{
+			name:   "basic command",
+			prompt: "Refactor the config parser",
+			want:   []string{"skaffen", "--mode", "print", "--prompt", "Refactor the config parser"},
+		},
+		{
+			name:   "empty prompt",
+			prompt: "",
+			want:   []string{"skaffen", "--mode", "print", "--prompt", ""},
+		},
+		{
+			name:   "prompt with special characters",
+			prompt: "Fix bug #42: handle 'quoted' strings & <angle> brackets",
+			want:   []string{"skaffen", "--mode", "print", "--prompt", "Fix bug #42: handle 'quoted' strings & <angle> brackets"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := BuildSkaffenCommand(tc.prompt)
+			if len(got) != len(tc.want) {
+				t.Fatalf("BuildSkaffenCommand() returned %d elements, want %d", len(got), len(tc.want))
+			}
+			for i := range got {
+				if got[i] != tc.want[i] {
+					t.Errorf("BuildSkaffenCommand()[%d] = %q, want %q", i, got[i], tc.want[i])
+				}
+			}
+		})
+	}
+}
