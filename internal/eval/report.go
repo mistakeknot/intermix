@@ -18,6 +18,17 @@ type Report struct {
 	FailureClusters []FailureCluster
 	Delta           *DeltaReport
 	Results         []CellResult
+	Tokens          TokenSummary
+}
+
+// TokenSummary holds aggregate token usage across all cells.
+type TokenSummary struct {
+	TotalInput          int `json:"total_input"`
+	TotalOutput         int `json:"total_output"`
+	TotalCacheCreation  int `json:"total_cache_creation"`
+	TotalCacheRead      int `json:"total_cache_read"`
+	BillingTokens       int `json:"billing_tokens"`       // input + output
+	EffectiveContext    int `json:"effective_context"`     // input + cache_read + cache_creation
 }
 
 // RepoStats tracks per-repo pass/fail counts.
@@ -88,6 +99,16 @@ func GenerateReport(results []CellResult, prevResults []CellResult) *Report {
 	if r.TotalCells > 0 {
 		r.PassRate = float64(r.SuccessCount) / float64(r.TotalCells) * 100
 	}
+
+	// Token aggregation
+	for _, cr := range results {
+		r.Tokens.TotalInput += cr.InputTokens
+		r.Tokens.TotalOutput += cr.OutputTokens
+		r.Tokens.TotalCacheCreation += cr.CacheCreationTokens
+		r.Tokens.TotalCacheRead += cr.CacheReadTokens
+	}
+	r.Tokens.BillingTokens = r.Tokens.TotalInput + r.Tokens.TotalOutput
+	r.Tokens.EffectiveContext = r.Tokens.TotalInput + r.Tokens.TotalCacheRead + r.Tokens.TotalCacheCreation
 
 	r.FailureClusters = ClusterFailures(results)
 
@@ -174,6 +195,16 @@ func FormatReport(r *Report) string {
 	b.WriteString(fmt.Sprintf("- **Success:** %d\n", r.SuccessCount))
 	b.WriteString(fmt.Sprintf("- **Failures:** %d\n", r.FailureCount))
 	b.WriteString(fmt.Sprintf("- **Pass rate:** %.1f%%\n", r.PassRate))
+
+	// Token summary
+	if r.Tokens.BillingTokens > 0 {
+		b.WriteString(fmt.Sprintf("- **Billing tokens:** %d (%d in + %d out)\n",
+			r.Tokens.BillingTokens, r.Tokens.TotalInput, r.Tokens.TotalOutput))
+		if r.Tokens.TotalCacheRead > 0 || r.Tokens.TotalCacheCreation > 0 {
+			b.WriteString(fmt.Sprintf("- **Effective context:** %d (%d cache_read + %d cache_create)\n",
+				r.Tokens.EffectiveContext, r.Tokens.TotalCacheRead, r.Tokens.TotalCacheCreation))
+		}
+	}
 
 	// Heatmap.
 	if len(r.Results) > 0 {
