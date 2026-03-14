@@ -1,0 +1,5 @@
+bin/intermix-mcp
+intermix-mcp
+.intermix-run.json
+.intermix-manifest.json
+intermix.jsonl

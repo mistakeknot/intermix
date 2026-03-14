@@ -1,0 +1,17 @@
+{
+  "name": "intermix",
+  "version": "0.1.0",
+  "description": "Cross-repo matrix evaluation harness — run Skaffen against unfamiliar codebases, classify outcomes, track failure patterns.",
+  "author": { "name": "mistakeknot" },
+  "license": "MIT",
+  "mcpServers": {
+    "intermix": {
+      "type": "stdio",
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/launch-mcp.sh",
+      "args": []
+    }
+  },
+  "skills": [
+    "./skills/evaluate"
+  ]
+}

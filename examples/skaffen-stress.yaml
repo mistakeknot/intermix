@@ -1,0 +1,287 @@
+# intermix.yaml — Skaffen cross-repo stress test matrix
+# 12 repos x 5 tasks (3 generic + 2 repo-specific) = 60 cells
+
+repos:
+  # Go (primary)
+  - id: chi
+    url: https://github.com/go-chi/chi
+    setup: go mod download
+    language: go
+    complexity: small
+
+  - id: cobra
+    url: https://github.com/spf13/cobra
+    setup: go mod download
+    language: go
+    complexity: medium
+
+  - id: zap
+    url: https://github.com/uber-go/zap
+    setup: go mod download
+    language: go
+    complexity: medium
+
+  - id: viper
+    url: https://github.com/spf13/viper
+    setup: go mod download
+    language: go
+    complexity: medium
+
+  # TypeScript
+  - id: zod
+    url: https://github.com/colinhacks/zod
+    setup: npm install
+    language: typescript
+    complexity: small
+
+  - id: fastify
+    url: https://github.com/fastify/fastify
+    setup: npm install
+    language: typescript
+    complexity: large
+    skaffen_config:
+      timeout: 600s
+
+  - id: commander
+    url: https://github.com/tj/commander.js
+    setup: npm install
+    language: typescript
+    complexity: small
+
+  # Python
+  - id: click
+    url: https://github.com/pallets/click
+    setup: "pip install -e ."
+    language: python
+    complexity: medium
+
+  - id: httpx
+    url: https://github.com/encode/httpx
+    setup: "pip install -e '.[test]'"
+    language: python
+    complexity: medium
+
+  - id: pydantic
+    url: https://github.com/pydantic/pydantic
+    setup: "pip install -e ."
+    language: python
+    complexity: large
+    skaffen_config:
+      timeout: 600s
+
+  # Rust
+  - id: clap
+    url: https://github.com/clap-rs/clap
+    setup: cargo fetch
+    language: rust
+    complexity: medium
+
+  - id: axum
+    url: https://github.com/tokio-rs/axum
+    setup: cargo fetch
+    language: rust
+    complexity: medium
+
+tasks:
+  # Generic templates (all repos)
+  - id: add-test
+    prompt: |
+      Find a public function in this repository that lacks unit test coverage.
+      Write a focused unit test for it. The test should verify the function's
+      core behavior with at least one positive case and one edge case.
+    difficulty: easy
+    tags: [testing, single-file]
+    target: auto
+
+  - id: refactor-extract
+    prompt: |
+      Find a function in this repository that is longer than 40 lines.
+      Extract a meaningful helper function from it. Update all callers.
+      All existing tests must still pass after refactoring.
+    difficulty: medium
+    tags: [refactor, multi-file]
+    target: auto
+
+  - id: add-feature
+    prompt: |
+      Read the README and understand what this library does. Add a small,
+      useful feature that extends existing functionality. Include tests
+      for the new feature. All existing tests must still pass.
+    difficulty: hard
+    tags: [feature, multi-file]
+    target: auto
+
+  # Repo-specific tasks
+  - id: chi-middleware
+    prompt: "Add a middleware to chi that logs the request method, path, and response time to stdout in a structured format."
+    difficulty: medium
+    tags: [feature, web]
+    repos: [chi]
+    validation_cmd: "go test ./..."
+
+  - id: chi-route-group
+    prompt: "Add a new route group /api/v2/health with a GET handler that returns JSON {\"status\": \"ok\", \"version\": \"2\"}. Include a test."
+    difficulty: easy
+    tags: [feature, web]
+    repos: [chi]
+    validation_cmd: "go test ./..."
+
+  - id: cobra-subcommand
+    prompt: "Add a 'version' subcommand to the example cobra app that prints version info in semver format. Include flag --json for JSON output. Add tests."
+    difficulty: medium
+    tags: [feature, cli]
+    repos: [cobra]
+    validation_cmd: "go test ./..."
+
+  - id: cobra-flag-validation
+    prompt: "Add input validation to an existing command's string flag — reject empty strings and strings longer than 255 characters. Include tests for both cases."
+    difficulty: easy
+    tags: [testing, cli]
+    repos: [cobra]
+    validation_cmd: "go test ./..."
+
+  - id: zap-custom-encoder
+    prompt: "Add a custom field encoder that formats time.Duration values as human-readable strings (e.g., '2m30s'). Include benchmarks."
+    difficulty: hard
+    tags: [feature, library]
+    repos: [zap]
+    validation_cmd: "go test ./..."
+
+  - id: zap-level-filter
+    prompt: "Write a test that verifies log level filtering works correctly — debug messages excluded at info level, etc."
+    difficulty: easy
+    tags: [testing, library]
+    repos: [zap]
+    validation_cmd: "go test ./..."
+
+  - id: viper-env-prefix
+    prompt: "Write a test that verifies environment variable binding with a custom prefix works correctly. Test with SetEnvPrefix and BindEnv."
+    difficulty: easy
+    tags: [testing, config]
+    repos: [viper]
+    validation_cmd: "go test ./..."
+
+  - id: viper-merge-config
+    prompt: "Write a test that verifies merging two config sources (file + env) with env taking precedence."
+    difficulty: medium
+    tags: [testing, config]
+    repos: [viper]
+    validation_cmd: "go test ./..."
+
+  - id: zod-custom-type
+    prompt: "Add a custom Zod schema type for validating ISO 8601 date strings. Include tests for valid dates, invalid formats, and edge cases."
+    difficulty: medium
+    tags: [feature, validation]
+    repos: [zod]
+    validation_cmd: "npm test"
+
+  - id: zod-error-format
+    prompt: "Write tests that verify error message formatting for deeply nested object validation failures."
+    difficulty: easy
+    tags: [testing, validation]
+    repos: [zod]
+    validation_cmd: "npm test"
+
+  - id: fastify-plugin
+    prompt: "Create a simple Fastify plugin that adds a /metrics endpoint returning JSON with request count and uptime. Include tests."
+    difficulty: hard
+    tags: [feature, web]
+    repos: [fastify]
+    validation_cmd: "npm test"
+
+  - id: fastify-hook
+    prompt: "Write a test for Fastify's onRequest hook that verifies headers are accessible and the hook chain executes in order."
+    difficulty: medium
+    tags: [testing, web]
+    repos: [fastify]
+    validation_cmd: "npm test"
+
+  - id: commander-help
+    prompt: "Write a test that verifies the help output format for a command with subcommands, options, and aliases."
+    difficulty: easy
+    tags: [testing, cli]
+    repos: [commander]
+    validation_cmd: "npm test"
+
+  - id: commander-action
+    prompt: "Add a new 'init' command that creates a config file with sensible defaults. Include tests."
+    difficulty: medium
+    tags: [feature, cli]
+    repos: [commander]
+    validation_cmd: "npm test"
+
+  - id: click-progress
+    prompt: "Write a test that verifies click.progressbar works correctly with a mock iterable."
+    difficulty: easy
+    tags: [testing, cli]
+    repos: [click]
+    validation_cmd: "pytest"
+
+  - id: click-file-param
+    prompt: "Add a new command that accepts a --config file parameter with validation for JSON format. Include tests."
+    difficulty: medium
+    tags: [feature, cli]
+    repos: [click]
+    validation_cmd: "pytest"
+
+  - id: httpx-retry
+    prompt: "Write tests for httpx retry behavior — verify exponential backoff, max retries, and retry-after header handling."
+    difficulty: medium
+    tags: [testing, http]
+    repos: [httpx]
+    validation_cmd: "pytest"
+
+  - id: httpx-timeout
+    prompt: "Write a test that verifies timeout configuration works for connect, read, and write timeouts independently."
+    difficulty: easy
+    tags: [testing, http]
+    repos: [httpx]
+    validation_cmd: "pytest"
+
+  - id: pydantic-validator
+    prompt: "Add a custom validator that validates email addresses with a specific domain suffix. Include tests for valid, invalid, and edge cases."
+    difficulty: medium
+    tags: [feature, validation]
+    repos: [pydantic]
+    validation_cmd: "pytest"
+
+  - id: pydantic-serialization
+    prompt: "Write tests that verify custom JSON serialization for models with datetime, Decimal, and UUID fields."
+    difficulty: easy
+    tags: [testing, validation]
+    repos: [pydantic]
+    validation_cmd: "pytest"
+
+  - id: clap-derive
+    prompt: "Add a new CLI subcommand using clap's derive macro with custom validation for a port number argument (1-65535). Include tests."
+    difficulty: hard
+    tags: [feature, cli]
+    repos: [clap]
+    validation_cmd: "cargo test"
+
+  - id: clap-help-format
+    prompt: "Write a test that verifies the help output includes all expected sections: usage, args, options, subcommands."
+    difficulty: easy
+    tags: [testing, cli]
+    repos: [clap]
+    validation_cmd: "cargo test"
+
+  - id: axum-middleware
+    prompt: "Add a middleware layer that measures request duration and adds it as a response header. Include integration tests."
+    difficulty: hard
+    tags: [feature, web]
+    repos: [axum]
+    validation_cmd: "cargo test"
+
+  - id: axum-error-handler
+    prompt: "Write tests for custom error handling — verify that different error types map to correct HTTP status codes and response bodies."
+    difficulty: medium
+    tags: [testing, web]
+    repos: [axum]
+    validation_cmd: "cargo test"
+
+defaults:
+  timeout: 300s
+  max_cells: 100
+  max_consecutive_failures: 5
+  max_duration: 4h
