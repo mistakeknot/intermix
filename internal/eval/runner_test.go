@@ -285,3 +285,37 @@ func TestBuildSkaffenCommand(t *testing.T) {
 		})
 	}
 }
+
+func TestParseSkaffenTokens(t *testing.T) {
+	tests := []struct {
+		name    string
+		output  string
+		wantIn  int
+		wantOut int
+		wantCR  int
+		wantCC  int
+	}{
+		{"basic", "[1 turns, 37 in / 9186 out tokens]", 37, 9186, 0, 0},
+		{"with cache", "[1 turns, 15 in / 6 out tokens, 3400 cache_read / 1200 cache_create]", 15, 6, 3400, 1200},
+		{"embedded", "text\n[2 turns, 100 in / 500 out tokens]\nmore", 100, 500, 0, 0},
+		{"no match", "no token info here", 0, 0, 0, 0},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rd := &RunDetails{}
+			ParseSkaffenTokens(rd, tc.output)
+			if rd.InputTokens != tc.wantIn {
+				t.Errorf("InputTokens = %d, want %d", rd.InputTokens, tc.wantIn)
+			}
+			if rd.OutputTokens != tc.wantOut {
+				t.Errorf("OutputTokens = %d, want %d", rd.OutputTokens, tc.wantOut)
+			}
+			if rd.CacheReadTokens != tc.wantCR {
+				t.Errorf("CacheReadTokens = %d, want %d", rd.CacheReadTokens, tc.wantCR)
+			}
+			if rd.CacheCreationTokens != tc.wantCC {
+				t.Errorf("CacheCreationTokens = %d, want %d", rd.CacheCreationTokens, tc.wantCC)
+			}
+		})
+	}
+}

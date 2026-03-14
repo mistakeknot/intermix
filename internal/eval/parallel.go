@@ -164,6 +164,9 @@ func PollBatch(ctx context.Context, results []BatchResult, workDir string, timeo
 				rd.Stderr = err.Error()
 			}
 
+			// Extract token usage from Skaffen's output
+			ParseSkaffenTokens(rd, stdout)
+
 			// Run validation if available
 			validationCmd := r.Cell.Task.ValidationCmd
 			if validationCmd == "" {

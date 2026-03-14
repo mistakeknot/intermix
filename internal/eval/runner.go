@@ -8,23 +8,52 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
 
 // RunDetails captures the full result of executing a cell (clone + skaffen + validation).
 type RunDetails struct {
-	CellID           string `json:"cell_id"`
-	Repo             string `json:"repo"`
-	Task             string `json:"task"`
-	ExitCode         int    `json:"exit_code"`
-	DurationMs       int64  `json:"duration_ms"`
-	Stdout           string `json:"stdout"`
-	Stderr           string `json:"stderr"`
-	FilesChanged     int    `json:"files_changed"`
-	ValidationPassed bool   `json:"validation_passed"`
-	ValidationOutput string `json:"validation_output"`
-	CloneDir         string `json:"clone_dir"`
+	CellID               string `json:"cell_id"`
+	Repo                 string `json:"repo"`
+	Task                 string `json:"task"`
+	ExitCode             int    `json:"exit_code"`
+	DurationMs           int64  `json:"duration_ms"`
+	Stdout               string `json:"stdout"`
+	Stderr               string `json:"stderr"`
+	FilesChanged         int    `json:"files_changed"`
+	ValidationPassed     bool   `json:"validation_passed"`
+	ValidationOutput     string `json:"validation_output"`
+	CloneDir             string `json:"clone_dir"`
+	InputTokens          int    `json:"input_tokens,omitempty"`
+	OutputTokens         int    `json:"output_tokens,omitempty"`
+	CacheCreationTokens  int    `json:"cache_creation_tokens,omitempty"`
+	CacheReadTokens      int    `json:"cache_read_tokens,omitempty"`
+}
+
+// parseSkaffenTokens extracts token usage from Skaffen's stderr/stdout output.
+// Matches lines like:
+//   [1 turns, 15 in / 6 out tokens]
+//   [1 turns, 15 in / 6 out tokens, 3400 cache_read / 1200 cache_create]
+var skaffenTokenRe = regexp.MustCompile(`\[(\d+) turns?, (\d+) in / (\d+) out tokens(?:, (\d+) cache_read / (\d+) cache_create)?\]`)
+
+// ParseSkaffenTokens extracts token counts from output text.
+// Populates the token fields on rd in-place.
+func ParseSkaffenTokens(rd *RunDetails, output string) {
+	m := skaffenTokenRe.FindStringSubmatch(output)
+	if m == nil {
+		return
+	}
+	rd.InputTokens, _ = strconv.Atoi(m[2])
+	rd.OutputTokens, _ = strconv.Atoi(m[3])
+	if m[4] != "" {
+		rd.CacheReadTokens, _ = strconv.Atoi(m[4])
+	}
+	if m[5] != "" {
+		rd.CacheCreationTokens, _ = strconv.Atoi(m[5])
+	}
 }
 
 // ValidationResult captures the outcome of running a validation command.

@@ -17,14 +17,19 @@ import (
 //  8. default:       tool_failure
 func ClassifyFromRunDetails(rd *RunDetails, repo, task string) CellResult {
 	cr := CellResult{
-		Type:             "cell_result",
-		Repo:             repo,
-		Task:             task,
-		ValidationPassed: rd.ValidationPassed,
-		DurationMs:       rd.DurationMs,
-		ExitCode:         rd.ExitCode,
-		FilesChanged:     rd.FilesChanged,
-		Timestamp:        time.Now().UTC().Format(time.RFC3339),
+		Type:                "cell_result",
+		Repo:                repo,
+		Task:                task,
+		ValidationPassed:    rd.ValidationPassed,
+		DurationMs:          rd.DurationMs,
+		ExitCode:            rd.ExitCode,
+		FilesChanged:        rd.FilesChanged,
+		InputTokens:         rd.InputTokens,
+		OutputTokens:        rd.OutputTokens,
+		CacheCreationTokens: rd.CacheCreationTokens,
+		CacheReadTokens:     rd.CacheReadTokens,
+		TokensUsed:          rd.InputTokens + rd.OutputTokens,
+		Timestamp:           time.Now().UTC().Format(time.RFC3339),
 	}
 
 	stderr := rd.Stderr

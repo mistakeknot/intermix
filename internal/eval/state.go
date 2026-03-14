@@ -57,7 +57,11 @@ type CellResult struct {
 	DurationMs       int64    `json:"duration_ms"`
 	ExitCode         int      `json:"exit_code"`
 	FilesChanged     int      `json:"files_changed"`
-	TokensUsed       int      `json:"tokens_used,omitempty"`
+	TokensUsed           int      `json:"tokens_used,omitempty"`
+	InputTokens          int      `json:"input_tokens,omitempty"`
+	OutputTokens         int      `json:"output_tokens,omitempty"`
+	CacheCreationTokens  int      `json:"cache_creation_tokens,omitempty"`
+	CacheReadTokens      int      `json:"cache_read_tokens,omitempty"`
 	LLMAnalysis      string   `json:"llm_analysis,omitempty"`
 	FailureReason    string   `json:"failure_reason,omitempty"`
 	PhasesReached    []string `json:"phases_reached,omitempty"`
