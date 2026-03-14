@@ -5,32 +5,32 @@ repos:
   # Go (primary)
   - id: chi
     url: https://github.com/go-chi/chi
-    setup: go mod download
+    setup: "export GOTOOLCHAIN=go1.23.0+auto && go mod download"
     language: go
     complexity: small
 
   - id: cobra
     url: https://github.com/spf13/cobra
-    setup: go mod download
+    setup: "export GOTOOLCHAIN=go1.23.0+auto && go mod download"
     language: go
     complexity: medium
 
   - id: zap
     url: https://github.com/uber-go/zap
-    setup: go mod download
+    setup: "export GOTOOLCHAIN=go1.23.0+auto && go mod download"
     language: go
     complexity: medium
 
   - id: viper
     url: https://github.com/spf13/viper
-    setup: go mod download
+    setup: "export GOTOOLCHAIN=go1.23.0+auto && go mod download"
     language: go
     complexity: medium
 
   # TypeScript
   - id: zod
     url: https://github.com/colinhacks/zod
-    setup: npm install
+    setup: pnpm install --no-frozen-lockfile
     language: typescript
     complexity: small
 
@@ -51,19 +51,19 @@ repos:
   # Python
   - id: click
     url: https://github.com/pallets/click
-    setup: "pip install -e ."
+    setup: "uv venv .venv && uv pip install -e ."
     language: python
     complexity: medium
 
   - id: httpx
     url: https://github.com/encode/httpx
-    setup: "pip install -e '.[test]'"
+    setup: "uv venv .venv && uv pip install -e '.[test]'"
     language: python
     complexity: medium
 
   - id: pydantic
     url: https://github.com/pydantic/pydantic
-    setup: "pip install -e ."
+    setup: "uv venv .venv && uv pip install -e ."
     language: python
     complexity: large
     skaffen_config:

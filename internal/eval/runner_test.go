@@ -252,17 +252,22 @@ func TestBuildSkaffenCommand(t *testing.T) {
 		{
 			name:   "basic command",
 			prompt: "Refactor the config parser",
-			want:   []string{"skaffen", "--mode", "print", "--prompt", "Refactor the config parser"},
+			want:   []string{"skaffen", "-mode", "print", "-p", "Refactor the config parser"},
 		},
 		{
 			name:   "empty prompt",
 			prompt: "",
-			want:   []string{"skaffen", "--mode", "print", "--prompt", ""},
+			want:   []string{"skaffen", "-mode", "print", "-p", ""},
 		},
 		{
 			name:   "prompt with special characters",
 			prompt: "Fix bug #42: handle 'quoted' strings & <angle> brackets",
-			want:   []string{"skaffen", "--mode", "print", "--prompt", "Fix bug #42: handle 'quoted' strings & <angle> brackets"},
+			want:   []string{"skaffen", "-mode", "print", "-p", "Fix bug #42: handle 'quoted' strings & <angle> brackets"},
+		},
+		{
+			name:   "multi-line prompt collapses to single line",
+			prompt: "Find a function\nthat is too long.\nRefactor it.",
+			want:   []string{"skaffen", "-mode", "print", "-p", "Find a function that is too long. Refactor it."},
 		},
 	}
 

@@ -81,7 +81,7 @@ func SpawnSkaffen(dir, prompt, timeout string) *RunDetails {
 	ctx, cancel := context.WithTimeout(context.Background(), dur)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "skaffen", "--mode", "print", "--prompt", prompt)
+	cmd := exec.CommandContext(ctx, "skaffen", "-mode", "print", "-p", prompt)
 	cmd.Dir = dir
 
 	var stdout, stderr bytes.Buffer
@@ -225,8 +225,22 @@ func BuildTmuxSessionName(repoID, taskID string) string {
 }
 
 // BuildSkaffenCommand returns the command slice for running skaffen in print mode.
+// The prompt is collapsed to a single line since tmux send-keys interprets
+// newlines as Enter keystrokes.
 func BuildSkaffenCommand(prompt string) []string {
-	return []string{"skaffen", "--mode", "print", "--prompt", prompt}
+	// Collapse multi-line prompts into a single line for tmux send-keys safety.
+	collapsed := strings.Join(strings.Fields(prompt), " ")
+	return []string{"skaffen", "-mode", "print", "-p", collapsed}
+}
+
+// BuildSkaffenShellCommand returns a shell-safe command string for use with
+// tmux send-keys. The prompt is single-quoted with internal single quotes
+// escaped as '\'' (end quote, literal quote, start quote).
+func BuildSkaffenShellCommand(prompt string) string {
+	collapsed := strings.Join(strings.Fields(prompt), " ")
+	// Shell-escape: replace ' with '\'' for safe single-quoting
+	escaped := strings.ReplaceAll(collapsed, "'", "'\\''")
+	return fmt.Sprintf("skaffen -mode print -p '%s'", escaped)
 }
 
 // intermuxMapping is the JSON structure written for intermux to discover
@@ -259,10 +273,11 @@ func SpawnSkaffenTmux(ctx context.Context, repoID, taskID, workDir, prompt, time
 		return "", fmt.Errorf("tmux new-session %s: %w: %s", sessionName, err, stderr.String())
 	}
 
-	// Spawn skaffen inside the session using send-keys with explicit argv.
-	// This avoids shell interpolation of the prompt string.
-	skaffenArgs := BuildSkaffenCommand(prompt)
-	sendCmd := exec.CommandContext(ctx, "tmux", append([]string{"send-keys", "-t", sessionName}, append(skaffenArgs, "Enter")...)...)
+	// Spawn skaffen inside the session using send-keys.
+	// The command is passed as a single shell-safe string with the prompt
+	// single-quoted to prevent word splitting.
+	cmdLine := BuildSkaffenShellCommand(prompt)
+	sendCmd := exec.CommandContext(ctx, "tmux", "send-keys", "-t", sessionName, cmdLine, "Enter")
 	var sendStderr bytes.Buffer
 	sendCmd.Stderr = &sendStderr
 	if err := sendCmd.Run(); err != nil {
