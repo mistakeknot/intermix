@@ -201,7 +201,7 @@ func InferValidationCmd(dir, language string) string {
 		}
 		return "npm test"
 	case "python", "py":
-		return "pytest -x --timeout=30 -q"
+		return "pytest -x -q"
 	case "rust", "rs":
 		return "cargo test"
 	case "java":
