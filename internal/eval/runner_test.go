@@ -101,8 +101,8 @@ func TestInferValidationCmd(t *testing.T) {
 	}{
 		{"go", "go test ./..."},
 		{"golang", "go test ./..."},
-		{"python", "pytest"},
-		{"py", "pytest"},
+		{"python", "pytest -x --timeout=30 -q"},
+		{"py", "pytest -x --timeout=30 -q"},
 		{"rust", "cargo test"},
 		{"rs", "cargo test"},
 		{"ts", "npm test"},

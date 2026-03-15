@@ -146,7 +146,7 @@ func RunValidation(dir, validationCmd string) ValidationResult {
 		return ValidationResult{Passed: true, Output: "no validation command configured"}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
 	// If a .venv exists, activate it before running the validation command.
@@ -201,7 +201,7 @@ func InferValidationCmd(dir, language string) string {
 		}
 		return "npm test"
 	case "python", "py":
-		return "pytest"
+		return "pytest -x --timeout=30 -q"
 	case "rust", "rs":
 		return "cargo test"
 	case "java":
