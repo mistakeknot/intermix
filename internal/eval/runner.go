@@ -214,6 +214,105 @@ func InferValidationCmd(dir, language string) string {
 	}
 }
 
+// InferTargetedValidationCmd detects changed files via git and builds a
+// validation command that only runs tests related to those files.
+// Returns empty string if no targeted command can be inferred (caller
+// should fall back to the full validation command).
+func InferTargetedValidationCmd(dir, language string) string {
+	// Get changed files
+	cmd := exec.Command("git", "diff", "--name-only", "HEAD")
+	cmd.Dir = dir
+	out, err := cmd.Output()
+	if err != nil || len(bytes.TrimSpace(out)) == 0 {
+		return ""
+	}
+
+	var changedFiles []string
+	for _, line := range bytes.Split(out, []byte("\n")) {
+		f := strings.TrimSpace(string(line))
+		if f != "" {
+			changedFiles = append(changedFiles, f)
+		}
+	}
+	if len(changedFiles) == 0 {
+		return ""
+	}
+
+	switch strings.ToLower(language) {
+	case "go", "golang":
+		// Find unique Go packages containing changed files
+		pkgs := make(map[string]bool)
+		for _, f := range changedFiles {
+			if strings.HasSuffix(f, ".go") {
+				pkg := "./" + filepath.Dir(f)
+				pkgs[pkg] = true
+			}
+		}
+		if len(pkgs) == 0 {
+			return ""
+		}
+		pkgList := make([]string, 0, len(pkgs))
+		for p := range pkgs {
+			pkgList = append(pkgList, p)
+		}
+		return "go test " + strings.Join(pkgList, " ")
+
+	case "python", "py":
+		// Find test files matching changed files
+		var testFiles []string
+		for _, f := range changedFiles {
+			if !strings.HasSuffix(f, ".py") {
+				continue
+			}
+			base := filepath.Base(f)
+			dir := filepath.Dir(f)
+			// If it's already a test file, use it directly
+			if strings.HasPrefix(base, "test_") || strings.HasSuffix(base, "_test.py") {
+				testFiles = append(testFiles, f)
+				continue
+			}
+			// Look for corresponding test file
+			candidates := []string{
+				filepath.Join(dir, "test_"+base),
+				filepath.Join("tests", "test_"+base),
+				filepath.Join(dir, strings.TrimSuffix(base, ".py")+"_test.py"),
+			}
+			for _, c := range candidates {
+				if _, err := os.Stat(filepath.Join(dir, "..", c)); err == nil {
+					testFiles = append(testFiles, c)
+					break
+				}
+			}
+		}
+		if len(testFiles) == 0 {
+			return ""
+		}
+		return "pytest -x -q " + strings.Join(testFiles, " ")
+
+	case "ts", "typescript", "js", "javascript":
+		// Find test files matching changed files
+		var testFiles []string
+		for _, f := range changedFiles {
+			if !strings.HasSuffix(f, ".ts") && !strings.HasSuffix(f, ".js") {
+				continue
+			}
+			base := filepath.Base(f)
+			// If it's already a test file, use it
+			if strings.Contains(base, ".test.") || strings.Contains(base, ".spec.") {
+				testFiles = append(testFiles, f)
+			}
+		}
+		if len(testFiles) == 0 {
+			return ""
+		}
+		// npm test typically runs all tests; for targeted, use the test runner directly
+		return "npx vitest run " + strings.Join(testFiles, " ")
+
+	default:
+		return ""
+	}
+}
+
 // countFilesChanged uses git status --porcelain to count changed files.
 func countFilesChanged(dir string) int {
 	cmd := exec.Command("git", "status", "--porcelain")

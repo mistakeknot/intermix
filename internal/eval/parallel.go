@@ -169,10 +169,18 @@ func PollBatch(ctx context.Context, results []BatchResult, workDir string, timeo
 			// Extract token usage from Skaffen's output
 			ParseSkaffenTokens(rd, stdout)
 
-			// Run validation if available
+			// Run validation: try targeted first (only changed-file tests),
+			// fall back to full suite if no targeted command can be inferred
+			// or if manifest specifies an explicit validation command.
 			validationCmd := r.Cell.Task.ValidationCmd
 			if validationCmd == "" {
-				validationCmd = InferValidationCmd(cloneDir, r.Cell.Repo.Language)
+				// Try targeted validation first
+				targeted := InferTargetedValidationCmd(cloneDir, r.Cell.Repo.Language)
+				if targeted != "" {
+					validationCmd = targeted
+				} else {
+					validationCmd = InferValidationCmd(cloneDir, r.Cell.Repo.Language)
+				}
 			}
 			if validationCmd != "" {
 				vr := RunValidation(cloneDir, validationCmd)
