@@ -37,7 +37,8 @@ type Task struct {
 	Tags          []string `yaml:"tags,omitempty"`
 	Target        string   `yaml:"target,omitempty"`
 	Repos         []string `yaml:"repos,omitempty"`
-	ValidationCmd string   `yaml:"validation_cmd,omitempty"`
+	ValidationCmd string            `yaml:"validation_cmd,omitempty"`
+	Metadata      map[string]string `yaml:"metadata,omitempty"` // SWE-bench: base_commit, test_patch, etc.
 }
 
 // Defaults holds circuit-breaker and limit defaults for the matrix.

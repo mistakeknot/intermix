@@ -85,8 +85,9 @@ func RunBatch(ctx context.Context, cells []BatchCell, workDir string, defaultTim
 			cellsDir := filepath.Join(workDir, "cells")
 			os.MkdirAll(cellsDir, 0755)
 
-			// Clone
-			if err := CloneRepo(c.Repo.URL, cloneDir); err != nil {
+			// Clone (with optional commit checkout for SWE-bench)
+			commit := c.Task.Metadata["base_commit"]
+			if err := CloneRepoAt(c.Repo.URL, cloneDir, commit); err != nil {
 				results[idx] = BatchResult{Cell: c, Error: fmt.Errorf("clone failed: %w", err)}
 				return
 			}
@@ -168,6 +169,11 @@ func PollBatch(ctx context.Context, results []BatchResult, workDir string, timeo
 
 			// Extract token usage from Skaffen's output
 			ParseSkaffenTokens(rd, stdout)
+
+			// Extract patch (git diff) for SWE-bench submission
+			if patch, err := ExtractPatch(cloneDir); err == nil && patch != "" {
+				rd.Patch = truncateOutput(patch, 128*1024)
+			}
 
 			// Run validation: try targeted first (only changed-file tests),
 			// fall back to full suite if no targeted command can be inferred

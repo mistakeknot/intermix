@@ -27,6 +27,7 @@ type RunDetails struct {
 	ValidationPassed     bool   `json:"validation_passed"`
 	ValidationOutput     string `json:"validation_output"`
 	CloneDir             string `json:"clone_dir"`
+	Patch                string `json:"patch,omitempty"`
 	InputTokens          int    `json:"input_tokens,omitempty"`
 	OutputTokens         int    `json:"output_tokens,omitempty"`
 	CacheCreationTokens  int    `json:"cache_creation_tokens,omitempty"`
@@ -63,17 +64,41 @@ type ValidationResult struct {
 	Output   string
 }
 
-// CloneRepo performs a shallow git clone of url into destDir.
+// CloneRepo performs a git clone of url into destDir. If commit is non-empty,
+// checks out that specific commit (required for SWE-bench). Uses shallow clone
+// when no commit is specified, full clone when a commit is needed.
 func CloneRepo(url, destDir string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	return CloneRepoAt(url, destDir, "")
+}
+
+// CloneRepoAt clones a repo and optionally checks out a specific commit.
+func CloneRepoAt(url, destDir, commit string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "git", "clone", "--depth=1", url, destDir)
+	cloneArgs := []string{"clone"}
+	if commit == "" {
+		cloneArgs = append(cloneArgs, "--depth=1")
+	}
+	cloneArgs = append(cloneArgs, url, destDir)
+
+	cmd := exec.CommandContext(ctx, "git", cloneArgs...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("git clone %s: %w: %s", url, err, stderr.String())
 	}
+
+	if commit != "" {
+		checkoutCmd := exec.CommandContext(ctx, "git", "checkout", commit)
+		checkoutCmd.Dir = destDir
+		var coStderr bytes.Buffer
+		checkoutCmd.Stderr = &coStderr
+		if err := checkoutCmd.Run(); err != nil {
+			return fmt.Errorf("git checkout %s: %w: %s", commit, err, coStderr.String())
+		}
+	}
+
 	return nil
 }
 
@@ -311,6 +336,23 @@ func InferTargetedValidationCmd(dir, language string) string {
 	default:
 		return ""
 	}
+}
+
+// ExtractPatch generates a unified diff of all changes in the working directory.
+// Returns the patch as a string. Used for SWE-bench submission format.
+func ExtractPatch(dir string) (string, error) {
+	// Stage all changes first so we capture new files too
+	addCmd := exec.Command("git", "add", "-A")
+	addCmd.Dir = dir
+	addCmd.Run() // best-effort
+
+	cmd := exec.Command("git", "diff", "--cached")
+	cmd.Dir = dir
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("git diff --cached: %w", err)
+	}
+	return string(out), nil
 }
 
 // countFilesChanged uses git status --porcelain to count changed files.
