@@ -1,0 +1,324 @@
+{
+  "TotalCells": 10,
+  "SuccessCount": 1,
+  "FailureCount": 9,
+  "PassRate": 10,
+  "ByRepo": {
+    "django__django": {
+      "Total": 2,
+      "Success": 1,
+      "Failure": 1
+    },
+    "matplotlib__matplotlib": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pallets__flask": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pytest-dev__pytest": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "scikit-learn__scikit-learn": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sphinx-doc__sphinx": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy": {
+      "Total": 2,
+      "Success": 0,
+      "Failure": 2
+    }
+  },
+  "ByTask": {
+    "django__django-11179": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-14999": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "matplotlib__matplotlib-23913": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pallets__flask-4045": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests-2674": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pytest-dev__pytest-5221": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "scikit-learn__scikit-learn-13497": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sphinx-doc__sphinx-7975": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-15345": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-16503": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    }
+  },
+  "ByOutcome": {
+    "partial": 8,
+    "setup_failure": 1,
+    "success": 1
+  },
+  "FailureClusters": [
+    {
+      "Outcome": "partial",
+      "Count": 8,
+      "Cells": [
+        "django__django:django__django-11179",
+        "matplotlib__matplotlib:matplotlib__matplotlib-23913",
+        "pallets__flask:pallets__flask-4045",
+        "psf__requests:psf__requests-2674",
+        "pytest-dev__pytest:pytest-dev__pytest-5221",
+        "sphinx-doc__sphinx:sphinx-doc__sphinx-7975",
+        "sympy__sympy:sympy__sympy-15345",
+        "sympy__sympy:sympy__sympy-16503"
+      ],
+      "BeadID": ""
+    },
+    {
+      "Outcome": "setup_failure",
+      "Count": 1,
+      "Cells": [
+        "scikit-learn__scikit-learn:scikit-learn__scikit-learn-13497"
+      ],
+      "BeadID": ""
+    }
+  ],
+  "Delta": null,
+  "Results": [
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-11179",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 73041,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 2589,
+      "input_tokens": 18,
+      "output_tokens": 2571,
+      "cache_creation_tokens": 26002,
+      "cache_read_tokens": 549151,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T05:56:29Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14999",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 205940,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 4468,
+      "input_tokens": 21,
+      "output_tokens": 4447,
+      "cache_creation_tokens": 41910,
+      "cache_read_tokens": 659527,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=true",
+      "timestamp": "2026-03-15T06:00:20Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "matplotlib__matplotlib",
+      "task": "matplotlib__matplotlib-23913",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 242465,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 4986,
+      "input_tokens": 28,
+      "output_tokens": 4958,
+      "cache_creation_tokens": 29487,
+      "cache_read_tokens": 960095,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:06:29Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pallets__flask",
+      "task": "pallets__flask-4045",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 213221,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 6379,
+      "input_tokens": 36,
+      "output_tokens": 6343,
+      "cache_creation_tokens": 46627,
+      "cache_read_tokens": 1239337,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:10:07Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "psf__requests",
+      "task": "psf__requests-2674",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 79804,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 3380,
+      "input_tokens": 16,
+      "output_tokens": 3364,
+      "cache_creation_tokens": 53271,
+      "cache_read_tokens": 636581,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:11:32Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pytest-dev__pytest",
+      "task": "pytest-dev__pytest-5221",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 171237,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 5228,
+      "input_tokens": 27,
+      "output_tokens": 5201,
+      "cache_creation_tokens": 46027,
+      "cache_read_tokens": 858942,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:14:31Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "scikit-learn__scikit-learn",
+      "task": "scikit-learn__scikit-learn-13497",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "tool or MCP call failed",
+      "timestamp": "2026-03-15T06:14:47Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sphinx-doc__sphinx",
+      "task": "sphinx-doc__sphinx-7975",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 207233,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 3821,
+      "input_tokens": 19,
+      "output_tokens": 3802,
+      "cache_creation_tokens": 53674,
+      "cache_read_tokens": 588130,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:18:40Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-15345",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 100146,
+      "exit_code": 0,
+      "files_changed": 1,
+      "tokens_used": 2931,
+      "input_tokens": 15,
+      "output_tokens": 2916,
+      "cache_creation_tokens": 35809,
+      "cache_read_tokens": 396401,
+      "llm_analysis": "Pilot run: exit=0, files=1, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:20:39Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-16503",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 516048,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 22505,
+      "input_tokens": 79,
+      "output_tokens": 22426,
+      "cache_creation_tokens": 82234,
+      "cache_read_tokens": 4477444,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T06:29:34Z"
+    }
+  ],
+  "Tokens": {
+    "total_input": 259,
+    "total_output": 56028,
+    "total_cache_creation": 415041,
+    "total_cache_read": 10365608,
+    "billing_tokens": 56287,
+    "effective_context": 10780908
+  }
+}

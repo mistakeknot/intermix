@@ -180,9 +180,14 @@ func handleRunCell(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolR
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Running cell: %s × %s\n", repoID, taskID))
 
-	// 1. Clone
-	sb.WriteString(fmt.Sprintf("Cloning %s...\n", repo.URL))
-	if err := CloneRepo(repo.URL, cloneDir); err != nil {
+	// 1. Clone (with optional commit checkout for SWE-bench)
+	commit := task.Metadata["base_commit"]
+	if commit != "" {
+		sb.WriteString(fmt.Sprintf("Cloning %s at %s...\n", repo.URL, commit[:12]))
+	} else {
+		sb.WriteString(fmt.Sprintf("Cloning %s...\n", repo.URL))
+	}
+	if err := CloneRepoAt(repo.URL, cloneDir, commit); err != nil {
 		rd := &RunDetails{CellID: cellID, Repo: repoID, Task: taskID, ExitCode: -1, Stderr: err.Error()}
 		writeRunDetails(dir, rd)
 		return mcp.NewToolResultText(fmt.Sprintf("Clone failed: %v\n\nClassify with: classify_result (outcome will be setup_failure)", err)), nil
@@ -208,6 +213,18 @@ func handleRunCell(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolR
 	rd.CellID = cellID
 	rd.Repo = repoID
 	rd.Task = taskID
+
+	// 3b. Extract patch (before applying test_patch which would pollute the diff)
+	patch, _ := ExtractPatch(cloneDir)
+	rd.Patch = patch
+
+	// 3c. Apply SWE-bench test_patch (adds tests that verify the fix)
+	if testPatch := task.Metadata["test_patch"]; testPatch != "" {
+		sb.WriteString("Applying test_patch...\n")
+		if err := ApplyTestPatch(cloneDir, testPatch); err != nil {
+			sb.WriteString(fmt.Sprintf("Warning: test_patch apply failed: %v\n", err))
+		}
+	}
 
 	// 4. Validate
 	valCmd := task.ValidationCmd

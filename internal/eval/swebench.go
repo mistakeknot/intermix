@@ -127,26 +127,83 @@ func buildSWEBenchPrompt(inst SWEBenchInstance) string {
 	return b.String()
 }
 
-// buildSWEBenchValidationCmd builds a validation command that applies the
-// test patch and runs the failing tests. Returns empty string if no test
-// patch is available (falls back to inferred validation).
+// buildSWEBenchValidationCmd builds a validation command that runs the
+// FAIL_TO_PASS tests. These are the tests that should pass after the fix
+// is applied. If FAIL_TO_PASS is empty, falls back to running the full
+// test suite.
+//
+// SWE-bench test IDs come in multiple formats:
+//   - unittest style: "test_name (module.Class)" → convert to pytest path
+//   - pytest native: "path/to/test.py::Class::test" → use as-is
+//   - bare name: "test_function" → use -k for keyword matching
 func buildSWEBenchValidationCmd(inst SWEBenchInstance) string {
 	if inst.TestPatch == "" {
 		return ""
 	}
-	// The test patch is applied, then we run the test suite
-	// For Python repos (most of SWE-bench), this is pytest
+
+	// Parse FAIL_TO_PASS to get specific test IDs
+	var failToPass []string
+	if inst.FailToPass != "" {
+		json.Unmarshal([]byte(inst.FailToPass), &failToPass)
+	}
+
+	// For Python repos, run specific FAIL_TO_PASS tests if available
+	if len(failToPass) > 0 && inferLanguageFromRepo(inst.Repo) == "python" {
+		var converted []string
+		useKFlag := false
+		for _, t := range failToPass {
+			if c := convertTestIDToPytest(t); c != "" {
+				converted = append(converted, "'"+c+"'")
+			} else {
+				// Bare name — use -k flag
+				useKFlag = true
+				converted = append(converted, t)
+			}
+		}
+		if useKFlag {
+			return "pytest -xvs -k '" + strings.Join(converted, " or ") + "'"
+		}
+		return "pytest -xvs " + strings.Join(converted, " ")
+	}
+
+	// Fallback to full suite
 	lang := inferLanguageFromRepo(inst.Repo)
-	testCmd := "pytest -x -q"
 	switch lang {
 	case "python":
-		testCmd = "pytest -x -q"
+		return "pytest -x -q"
 	case "javascript", "typescript":
-		testCmd = "npm test"
+		return "npm test"
 	case "go":
-		testCmd = "go test ./..."
+		return "go test ./..."
 	}
-	return testCmd
+	return "pytest -x -q"
+}
+
+// convertTestIDToPytest converts a test identifier to pytest format.
+// Returns empty string for bare function names (caller should use -k).
+func convertTestIDToPytest(testID string) string {
+	// Already pytest format (contains ::)
+	if strings.Contains(testID, "::") {
+		return testID
+	}
+
+	// Unittest format: "test_name (module.submodule.Class)"
+	parenIdx := strings.Index(testID, " (")
+	if parenIdx > 0 && strings.HasSuffix(testID, ")") {
+		testName := testID[:parenIdx]
+		moduleClass := testID[parenIdx+2 : len(testID)-1]
+		parts := strings.Split(moduleClass, ".")
+		if len(parts) >= 2 {
+			// Last part is class, rest is module path
+			path := strings.Join(parts[:len(parts)-1], "/")
+			class := parts[len(parts)-1]
+			return path + "::" + class + "::" + testName
+		}
+		return moduleClass + "::" + testName
+	}
+
+	// Bare function name — signal to use -k
+	return ""
 }
 
 // inferLanguageFromRepo guesses the language from a GitHub repo path.
@@ -170,7 +227,7 @@ func inferLanguageFromRepo(repo string) string {
 func inferSetupFromLanguage(lang string) string {
 	switch lang {
 	case "python":
-		return "uv venv .venv && uv pip install -e '.[dev,test]' 2>/dev/null || uv pip install -e . 2>/dev/null || pip install -e . 2>/dev/null"
+		return "uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev,test]' 2>/dev/null || VIRTUAL_ENV=$PWD/.venv uv pip install -e . 2>/dev/null"
 	case "javascript", "typescript":
 		return "npm install"
 	case "go":

@@ -1,0 +1,559 @@
+repos:
+- id: django__django
+  url: https://github.com/django/django
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+- id: matplotlib__matplotlib
+  url: https://github.com/matplotlib/matplotlib
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install numpy && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+- id: pallets__flask
+  url: https://github.com/pallets/flask
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+- id: psf__requests
+  url: https://github.com/psf/requests
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e . && VIRTUAL_ENV=$PWD/.venv uv pip install pytest
+- id: pytest-dev__pytest
+  url: https://github.com/pytest-dev/pytest
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[testing]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+- id: scikit-learn__scikit-learn
+  url: https://github.com/scikit-learn/scikit-learn
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install numpy scipy cython && VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+- id: sphinx-doc__sphinx
+  url: https://github.com/sphinx-doc/sphinx
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[test]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+- id: sympy__sympy
+  url: https://github.com/sympy/sympy
+  language: python
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+tasks:
+- id: django__django-11179
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\ndelete() on instances of models without any dependencies doesn't clear PKs.\nDescription\n\t\nDeleting any model with no dependencies\
+    \ not updates the PK on the model. It should be set to None after .delete() call.\nSee Django.db.models.deletion:276-281. Should update the model line 280.\n\n\n## Hints\n\nReproduced at 1ffddfc233e2d5139cc6ec31a4ec6ef70b10f87f.\
+    \ Regression in bc7dd8490b882b2cefdc7faf431dc64c532b79c9. Thanks for the report.\nRegression test.\nI have attached a simple fix which mimics what \u200Bhttps://github.com/django/django/blob/master/django/db/models/deletion.py#L324-L326\
+    \ does for multiple objects. I am not sure if we need \u200Bhttps://github.com/django/django/blob/master/django/db/models/deletion.py#L320-L323 (the block above) because I think field_updates is only\
+    \ ever filled if the objects are not fast-deletable -- ie \u200Bhttps://github.com/django/django/blob/master/django/db/models/deletion.py#L224 is not called due to the can_fast_delete check at the beginning\
+    \ of the collect function. That said, if we want to be extra \"safe\" we can just move lines 320 - 326 into an extra function and call that from the old and new location (though I do not think it is\
+    \ needed).\n\nMake the minimal code changes needed to fix the issue. All existing tests must still pass after your fix."
+  repos:
+  - django__django
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/python tests/runtests.py --settings=test_sqlite delete.tests.FastDeleteTests.test_fast_delete_instance_set_pk_none
+  metadata:
+    base_commit: 19fc6376ce67d01ca37a91ef2f55ef769f50513a
+    test_patch: "diff --git a/tests/delete/tests.py b/tests/delete/tests.py\n--- a/tests/delete/tests.py\n+++ b/tests/delete/tests.py\n@@ -1,6 +1,7 @@\n from math import ceil\n \n from django.db import\
+      \ IntegrityError, connection, models\n+from django.db.models.deletion import Collector\n from django.db.models.sql.constants import GET_ITERATOR_CHUNK_SIZE\n from django.test import TestCase, skipIfDBFeature,\
+      \ skipUnlessDBFeature\n \n@@ -471,6 +472,14 @@ def test_fast_delete_qs(self):\n         self.assertEqual(User.objects.count(), 1)\n         self.assertTrue(User.objects.filter(pk=u2.pk).exists())\n\
+      \ \n+    def test_fast_delete_instance_set_pk_none(self):\n+        u = User.objects.create()\n+        # User can be fast-deleted.\n+        collector = Collector(using='default')\n+        self.assertTrue(collector.can_fast_delete(u))\n\
+      +        u.delete()\n+        self.assertIsNone(u.pk)\n+\n     def test_fast_delete_joined_qs(self):\n         a = Avatar.objects.create(desc='a')\n         User.objects.create(avatar=a)\n"
+    fail_to_pass: '["test_fast_delete_instance_set_pk_none (delete.tests.FastDeleteTests)"]'
+    pass_to_pass: '["test_fast_delete_empty_no_update_can_self_select (delete.tests.FastDeleteTests)", "test_fast_delete_fk (delete.tests.FastDeleteTests)", "test_fast_delete_inheritance (delete.tests.FastDeleteTests)",
+      "test_fast_delete_joined_qs (delete.tests.FastDeleteTests)", "test_fast_delete_large_batch (delete.tests.FastDeleteTests)", "test_fast_delete_m2m (delete.tests.FastDeleteTests)", "test_fast_delete_qs
+      (delete.tests.FastDeleteTests)", "test_fast_delete_revm2m (delete.tests.FastDeleteTests)", "test_auto (delete.tests.OnDeleteTests)", "test_auto_nullable (delete.tests.OnDeleteTests)", "test_cascade
+      (delete.tests.OnDeleteTests)", "test_cascade_from_child (delete.tests.OnDeleteTests)", "test_cascade_from_parent (delete.tests.OnDeleteTests)", "test_cascade_nullable (delete.tests.OnDeleteTests)",
+      "test_do_nothing (delete.tests.OnDeleteTests)", "test_do_nothing_qscount (delete.tests.OnDeleteTests)", "test_inheritance_cascade_down (delete.tests.OnDeleteTests)", "test_inheritance_cascade_up (delete.tests.OnDeleteTests)",
+      "test_o2o_setnull (delete.tests.OnDeleteTests)", "test_protect (delete.tests.OnDeleteTests)", "test_setdefault (delete.tests.OnDeleteTests)", "test_setdefault_none (delete.tests.OnDeleteTests)", "test_setnull
+      (delete.tests.OnDeleteTests)", "test_setnull_from_child (delete.tests.OnDeleteTests)", "test_setnull_from_parent (delete.tests.OnDeleteTests)", "test_setvalue (delete.tests.OnDeleteTests)", "test_bulk
+      (delete.tests.DeletionTests)", "test_can_defer_constraint_checks (delete.tests.DeletionTests)", "test_delete_with_keeping_parents (delete.tests.DeletionTests)", "test_delete_with_keeping_parents_relationships
+      (delete.tests.DeletionTests)", "test_deletion_order (delete.tests.DeletionTests)", "test_hidden_related (delete.tests.DeletionTests)", "test_instance_update (delete.tests.DeletionTests)", "test_large_delete
+      (delete.tests.DeletionTests)", "test_large_delete_related (delete.tests.DeletionTests)", "test_m2m (delete.tests.DeletionTests)", "test_model_delete_returns_num_rows (delete.tests.DeletionTests)",
+      "test_proxied_model_duplicate_queries (delete.tests.DeletionTests)", "test_queryset_delete_returns_num_rows (delete.tests.DeletionTests)", "test_relational_post_delete_signals_happen_before_parent_object
+      (delete.tests.DeletionTests)"]'
+- id: django__django-14999
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nRenameModel with db_table should be a noop.\nDescription\n\t\nA RenameModel operation that already has db_table defined must be a noop.\n\
+    In Postgres, it drops and recreates foreign key constraints. In sqlite it recreates the table (as expected for a table renaming).\n\n\nMake the minimal code changes needed to fix the issue. All existing\
+    \ tests must still pass after your fix."
+  repos:
+  - django__django
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/python tests/runtests.py --settings=test_sqlite migrations.test_operations.OperationTests.test_rename_model_with_db_table_noop
+  metadata:
+    base_commit: a754b82dac511475b6276039471ccd17cc64aeb8
+    test_patch: "diff --git a/tests/migrations/test_operations.py b/tests/migrations/test_operations.py\n--- a/tests/migrations/test_operations.py\n+++ b/tests/migrations/test_operations.py\n@@ -793,6 +793,28\
+      \ @@ def test_rename_model_with_m2m(self):\n         self.assertEqual(Rider.objects.count(), 2)\n         self.assertEqual(Pony._meta.get_field('riders').remote_field.through.objects.count(), 2)\n\
+      \ \n+    def test_rename_model_with_db_table_noop(self):\n+        app_label = 'test_rmwdbtn'\n+        project_state = self.apply_operations(app_label, ProjectState(), operations=[\n+           \
+      \ migrations.CreateModel('Rider', fields=[\n+                ('id', models.AutoField(primary_key=True)),\n+            ], options={'db_table': 'rider'}),\n+            migrations.CreateModel('Pony',\
+      \ fields=[\n+                ('id', models.AutoField(primary_key=True)),\n+                ('rider', models.ForeignKey('%s.Rider' % app_label, models.CASCADE)),\n+            ]),\n+        ])\n+ \
+      \       new_state = project_state.clone()\n+        operation = migrations.RenameModel('Rider', 'Runner')\n+        operation.state_forwards(app_label, new_state)\n+\n+        with connection.schema_editor()\
+      \ as editor:\n+            with self.assertNumQueries(0):\n+                operation.database_forwards(app_label, editor, project_state, new_state)\n+        with connection.schema_editor() as editor:\n\
+      +            with self.assertNumQueries(0):\n+                operation.database_backwards(app_label, editor, new_state, project_state)\n+\n     def test_rename_m2m_target_model(self):\n         app_label\
+      \ = \"test_rename_m2m_target_model\"\n         project_state = self.apply_operations(app_label, ProjectState(), operations=[\n"
+    fail_to_pass: '["test_rename_model_with_db_table_noop (migrations.test_operations.OperationTests)"]'
+    pass_to_pass: '["test_references_model_mixin (migrations.test_operations.TestCreateModel)", "test_reference_field_by_through_fields (migrations.test_operations.FieldOperationTests)", "test_references_field_by_from_fields
+      (migrations.test_operations.FieldOperationTests)", "test_references_field_by_name (migrations.test_operations.FieldOperationTests)", "test_references_field_by_remote_field_model (migrations.test_operations.FieldOperationTests)",
+      "test_references_field_by_through (migrations.test_operations.FieldOperationTests)", "test_references_field_by_to_fields (migrations.test_operations.FieldOperationTests)", "test_references_model (migrations.test_operations.FieldOperationTests)",
+      "Tests the AddField operation.", "The CreateTable operation ignores swapped models.", "Tests the DeleteModel operation ignores swapped models.", "Add/RemoveIndex operations ignore swapped models.",
+      "Tests the AddField operation on TextField/BinaryField.", "Tests the AddField operation on TextField.", "test_add_constraint (migrations.test_operations.OperationTests)", "test_add_constraint_combinable
+      (migrations.test_operations.OperationTests)", "test_add_constraint_percent_escaping (migrations.test_operations.OperationTests)", "test_add_covering_unique_constraint (migrations.test_operations.OperationTests)",
+      "test_add_deferred_unique_constraint (migrations.test_operations.OperationTests)", "Tests the AddField operation with a ManyToManyField.", "Tests the AddField operation''s state alteration", "test_add_func_index
+      (migrations.test_operations.OperationTests)", "test_add_func_unique_constraint (migrations.test_operations.OperationTests)", "Test the AddIndex operation.", "test_add_index_state_forwards (migrations.test_operations.OperationTests)",
+      "test_add_or_constraint (migrations.test_operations.OperationTests)", "test_add_partial_unique_constraint (migrations.test_operations.OperationTests)", "Tests the AlterField operation.", "AlterField
+      operation is a noop when adding only a db_column and the", "test_alter_field_m2m (migrations.test_operations.OperationTests)", "Tests the AlterField operation on primary keys (for things like PostgreSQL''s
+      SERIAL weirdness)", "Tests the AlterField operation on primary keys changes any FKs pointing to it.", "test_alter_field_pk_mti_fk (migrations.test_operations.OperationTests)", "If AlterField doesn''t
+      reload state appropriately, the second AlterField", "test_alter_field_reloads_state_on_fk_with_to_field_related_name_target_type_change (migrations.test_operations.OperationTests)", "test_alter_field_reloads_state_on_fk_with_to_field_target_type_change
+      (migrations.test_operations.OperationTests)", "test_alter_field_with_func_index (migrations.test_operations.OperationTests)", "test_alter_field_with_func_unique_constraint (migrations.test_operations.OperationTests)",
+      "Test AlterField operation with an index to ensure indexes created via", "Creating and then altering an FK works correctly", "Altering an FK to a non-FK works (#23244)", "Tests the AlterIndexTogether
+      operation.", "test_alter_index_together_remove (migrations.test_operations.OperationTests)", "test_alter_index_together_remove_with_unique_together (migrations.test_operations.OperationTests)", "The
+      managers on a model are set.", "Tests the AlterModelOptions operation.", "The AlterModelOptions operation removes keys from the dict (#23121)", "Tests the AlterModelTable operation.", "AlterModelTable
+      should rename auto-generated M2M tables.", "Tests the AlterModelTable operation if the table name is set to None.", "Tests the AlterModelTable operation if the table name is not changed.", "Tests
+      the AlterOrderWithRespectTo operation.", "Tests the AlterUniqueTogether operation.", "test_alter_unique_together_remove (migrations.test_operations.OperationTests)", "A field may be migrated from
+      AutoField to BigAutoField.", "Column names that are SQL keywords shouldn''t cause problems when used", "Tests the CreateModel operation.", "Tests the CreateModel operation on a multi-table inheritance
+      setup.", "Test the creation of a model with a ManyToMany field and the", "test_create_model_with_constraint (migrations.test_operations.OperationTests)", "test_create_model_with_deferred_unique_constraint
+      (migrations.test_operations.OperationTests)", "test_create_model_with_duplicate_base (migrations.test_operations.OperationTests)", "test_create_model_with_duplicate_field_name (migrations.test_operations.OperationTests)",
+      "test_create_model_with_duplicate_manager_name (migrations.test_operations.OperationTests)", "test_create_model_with_partial_unique_constraint (migrations.test_operations.OperationTests)", "Tests
+      the CreateModel operation directly followed by an", "CreateModel ignores proxy models.", "CreateModel ignores unmanaged models.", "Tests the DeleteModel operation.", "test_delete_mti_model (migrations.test_operations.OperationTests)",
+      "Tests the DeleteModel operation ignores proxy models.", "A model with BigAutoField can be created.", "test_remove_constraint (migrations.test_operations.OperationTests)", "test_remove_covering_unique_constraint
+      (migrations.test_operations.OperationTests)", "test_remove_deferred_unique_constraint (migrations.test_operations.OperationTests)", "Tests the RemoveField operation.", "test_remove_field_m2m (migrations.test_operations.OperationTests)",
+      "test_remove_field_m2m_with_through (migrations.test_operations.OperationTests)", "Tests the RemoveField operation on a foreign key.", "test_remove_func_index (migrations.test_operations.OperationTests)",
+      "test_remove_func_unique_constraint (migrations.test_operations.OperationTests)", "Test the RemoveIndex operation.", "test_remove_index_state_forwards (migrations.test_operations.OperationTests)",
+      "test_remove_partial_unique_constraint (migrations.test_operations.OperationTests)", "Tests the RenameField operation.", "test_rename_field_case (migrations.test_operations.OperationTests)", "If RenameField
+      doesn''t reload state appropriately, the AlterField", "test_rename_field_with_db_column (migrations.test_operations.OperationTests)", "RenameModel renames a many-to-many column after a RenameField.",
+      "test_rename_m2m_target_model (migrations.test_operations.OperationTests)", "test_rename_m2m_through_model (migrations.test_operations.OperationTests)", "test_rename_missing_field (migrations.test_operations.OperationTests)",
+      "Tests the RenameModel operation.", "RenameModel operations shouldn''t trigger the caching of rendered apps", "test_rename_model_with_m2m (migrations.test_operations.OperationTests)", "Tests the RenameModel
+      operation on model with self referential FK.", "test_rename_model_with_self_referential_m2m (migrations.test_operations.OperationTests)", "Tests the RenameModel operation on a model which has a superclass
+      that", "test_rename_referenced_field_state_forward (migrations.test_operations.OperationTests)", "test_repoint_field_m2m (migrations.test_operations.OperationTests)", "Tests the RunPython operation",
+      "Tests the RunPython operation correctly handles the \"atomic\" keyword", "#24098 - Tests no-op RunPython operations.", "#24282 - Model changes to a FK reverse side update the model", "Tests the RunSQL
+      operation.", "test_run_sql_add_missing_semicolon_on_collect_sql (migrations.test_operations.OperationTests)", "#24098 - Tests no-op RunSQL operations.", "#23426 - RunSQL should accept parameters.",
+      "#23426 - RunSQL should fail when a list of statements with an incorrect", "Tests the SeparateDatabaseAndState operation.", "A complex SeparateDatabaseAndState operation: Multiple operations both",
+      "A field may be migrated from SmallAutoField to AutoField.", "A field may be migrated from SmallAutoField to BigAutoField."]'
+- id: matplotlib__matplotlib-23913
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nlegend draggable as keyword\n<!--To help us understand and resolve your issue, please fill out the form to the best of your ability.-->\r\
+    \n<!--You can feel free to delete the sections that do not apply.-->\r\n\r\n### Feature request\r\n\r\n**There is not keyword to make legend draggable at creation**\r\n\r\n<!--A short 1-2 sentences\
+    \ that succinctly describes the bug-->\r\n\r\nIs there a code reason why one can not add a \"draggable=True\" keyword to the __init__ function for Legend?  This would be more handy than having to call\
+    \ it after legend creation.  And, naively, it would seem simple to do.  But maybe there is a reason why it would not work?\n\n\n## Hints\n\nThis seems like a reasonable request, you're welcome to submit\
+    \ a PR :-)  Note that the same comment applies to annotations.\r\nI would also deprecate `draggable()` in favor of the more classic `set_draggable()`, `get_draggable()` (and thus, in the long-term future,\
+    \ `.draggable` could become a property).\n\nMake the minimal code changes needed to fix the issue. All existing tests must still pass after your fix."
+  repos:
+  - matplotlib__matplotlib
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/pytest -xvs 'lib/matplotlib/tests/test_legend.py::test_legend_draggable[True]' 'lib/matplotlib/tests/test_legend.py::test_legend_draggable[False]'
+  metadata:
+    base_commit: 5c4595267ccd3daf78f5fd05693b7ecbcd575c1e
+    test_patch: "diff --git a/lib/matplotlib/tests/test_legend.py b/lib/matplotlib/tests/test_legend.py\n--- a/lib/matplotlib/tests/test_legend.py\n+++ b/lib/matplotlib/tests/test_legend.py\n@@ -783,6 +783,14\
+      \ @@ def test_get_set_draggable():\n     assert not legend.get_draggable()\n \n \n+@pytest.mark.parametrize('draggable', (True, False))\n+def test_legend_draggable(draggable):\n+    fig, ax = plt.subplots()\n\
+      +    ax.plot(range(10), label='shabnams')\n+    leg = ax.legend(draggable=draggable)\n+    assert leg.get_draggable() is draggable\n+\n+\n def test_alpha_handles():\n     x, n, hh = plt.hist([1, 2,\
+      \ 3], alpha=0.25, label='data', color='red')\n     legend = plt.legend()\n"
+    fail_to_pass: '["lib/matplotlib/tests/test_legend.py::test_legend_draggable[True]", "lib/matplotlib/tests/test_legend.py::test_legend_draggable[False]"]'
+    pass_to_pass: '["lib/matplotlib/tests/test_legend.py::test_legend_ordereddict", "lib/matplotlib/tests/test_legend.py::test_legend_auto1[png]", "lib/matplotlib/tests/test_legend.py::test_legend_auto1[pdf]",
+      "lib/matplotlib/tests/test_legend.py::test_legend_auto2[png]", "lib/matplotlib/tests/test_legend.py::test_legend_auto2[pdf]", "lib/matplotlib/tests/test_legend.py::test_legend_auto3[png]", "lib/matplotlib/tests/test_legend.py::test_legend_auto3[pdf]",
+      "lib/matplotlib/tests/test_legend.py::test_various_labels[png]", "lib/matplotlib/tests/test_legend.py::test_various_labels[pdf]", "lib/matplotlib/tests/test_legend.py::test_legend_label_with_leading_underscore",
+      "lib/matplotlib/tests/test_legend.py::test_labels_first[png]", "lib/matplotlib/tests/test_legend.py::test_multiple_keys[png]", "lib/matplotlib/tests/test_legend.py::test_alpha_rgba[png]", "lib/matplotlib/tests/test_legend.py::test_alpha_rcparam[png]",
+      "lib/matplotlib/tests/test_legend.py::test_fancy[png]", "lib/matplotlib/tests/test_legend.py::test_fancy[pdf]", "lib/matplotlib/tests/test_legend.py::test_framealpha[png]", "lib/matplotlib/tests/test_legend.py::test_framealpha[pdf]",
+      "lib/matplotlib/tests/test_legend.py::test_rc[png]", "lib/matplotlib/tests/test_legend.py::test_rc[pdf]", "lib/matplotlib/tests/test_legend.py::test_legend_expand[png]", "lib/matplotlib/tests/test_legend.py::test_legend_expand[pdf]",
+      "lib/matplotlib/tests/test_legend.py::test_hatching[png]", "lib/matplotlib/tests/test_legend.py::test_hatching[pdf]", "lib/matplotlib/tests/test_legend.py::test_legend_remove", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_no_args",
+      "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_positional_handles_labels", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_positional_handles_only", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_positional_labels_only",
+      "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_three_args", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_handler_map", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_kwargs_handles_only",
+      "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_kwargs_labels_only", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_legend_kwargs_handles_labels", "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_warn_mixed_args_and_kwargs",
+      "lib/matplotlib/tests/test_legend.py::TestLegendFunction::test_parasite", "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_legend_handle_label", "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_legend_no_args",
+      "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_legend_label_arg", "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_legend_label_three_args", "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_legend_label_three_args_pluskw",
+      "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_legend_kw_args", "lib/matplotlib/tests/test_legend.py::TestLegendFigureFunction::test_warn_args_kwargs", "lib/matplotlib/tests/test_legend.py::test_legend_stackplot[png]",
+      "lib/matplotlib/tests/test_legend.py::test_cross_figure_patch_legend", "lib/matplotlib/tests/test_legend.py::test_nanscatter", "lib/matplotlib/tests/test_legend.py::test_legend_repeatcheckok", "lib/matplotlib/tests/test_legend.py::test_not_covering_scatter[png]",
+      "lib/matplotlib/tests/test_legend.py::test_not_covering_scatter_transform[png]", "lib/matplotlib/tests/test_legend.py::test_linecollection_scaled_dashes", "lib/matplotlib/tests/test_legend.py::test_handler_numpoints",
+      "lib/matplotlib/tests/test_legend.py::test_text_nohandler_warning", "lib/matplotlib/tests/test_legend.py::test_empty_bar_chart_with_legend", "lib/matplotlib/tests/test_legend.py::test_shadow_framealpha",
+      "lib/matplotlib/tests/test_legend.py::test_legend_title_empty", "lib/matplotlib/tests/test_legend.py::test_legend_proper_window_extent", "lib/matplotlib/tests/test_legend.py::test_window_extent_cached_renderer",
+      "lib/matplotlib/tests/test_legend.py::test_legend_title_fontprop_fontsize", "lib/matplotlib/tests/test_legend.py::test_legend_alignment[center]", "lib/matplotlib/tests/test_legend.py::test_legend_alignment[left]",
+      "lib/matplotlib/tests/test_legend.py::test_legend_alignment[right]", "lib/matplotlib/tests/test_legend.py::test_legend_set_alignment[center]", "lib/matplotlib/tests/test_legend.py::test_legend_set_alignment[left]",
+      "lib/matplotlib/tests/test_legend.py::test_legend_set_alignment[right]", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_single[red]", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_single[none]",
+      "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_single[color2]", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_list", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_linecolor",
+      "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_markeredgecolor", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_markerfacecolor", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_single[red]",
+      "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_single[none]", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_single[color2]", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_linecolor",
+      "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_markeredgecolor", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_markeredgecolor_short", "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_markerfacecolor",
+      "lib/matplotlib/tests/test_legend.py::test_legend_labelcolor_rcparam_markerfacecolor_short", "lib/matplotlib/tests/test_legend.py::test_get_set_draggable", "lib/matplotlib/tests/test_legend.py::test_alpha_handles",
+      "lib/matplotlib/tests/test_legend.py::test_warn_big_data_best_loc", "lib/matplotlib/tests/test_legend.py::test_no_warn_big_data_when_loc_specified", "lib/matplotlib/tests/test_legend.py::test_plot_multiple_input_multiple_label[label_array0]",
+      "lib/matplotlib/tests/test_legend.py::test_plot_multiple_input_multiple_label[label_array1]", "lib/matplotlib/tests/test_legend.py::test_plot_multiple_input_multiple_label[label_array2]", "lib/matplotlib/tests/test_legend.py::test_plot_multiple_input_single_label[one]",
+      "lib/matplotlib/tests/test_legend.py::test_plot_multiple_input_single_label[1]", "lib/matplotlib/tests/test_legend.py::test_plot_multiple_input_single_label[int]", "lib/matplotlib/tests/test_legend.py::test_plot_single_input_multiple_label[label_array0]",
+      "lib/matplotlib/tests/test_legend.py::test_plot_single_input_multiple_label[label_array1]", "lib/matplotlib/tests/test_legend.py::test_plot_single_input_multiple_label[label_array2]", "lib/matplotlib/tests/test_legend.py::test_plot_multiple_label_incorrect_length_exception",
+      "lib/matplotlib/tests/test_legend.py::test_legend_face_edgecolor", "lib/matplotlib/tests/test_legend.py::test_legend_text_axes", "lib/matplotlib/tests/test_legend.py::test_handlerline2d", "lib/matplotlib/tests/test_legend.py::test_subfigure_legend",
+      "lib/matplotlib/tests/test_legend.py::test_setting_alpha_keeps_polycollection_color", "lib/matplotlib/tests/test_legend.py::test_legend_markers_from_line2d", "lib/matplotlib/tests/test_legend.py::test_ncol_ncols[png]",
+      "lib/matplotlib/tests/test_legend.py::test_ncol_ncols[pdf]"]'
+- id: pallets__flask-4045
+  prompt: 'Fix the following issue in this repository.
+
+
+    ## Issue
+
+
+    Raise error when blueprint name contains a dot
+
+    This is required since every dot is now significant since blueprints can be nested. An error was already added for endpoint names in 1.0, but should have been added for this as well.
+
+
+
+    Make the minimal code changes needed to fix the issue. All existing tests must still pass after your fix.'
+  repos:
+  - pallets__flask
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/pytest -xvs 'tests/test_blueprints.py::test_dotted_name_not_allowed' 'tests/test_blueprints.py::test_route_decorator_custom_endpoint_with_dots'
+  metadata:
+    base_commit: d8c37f43724cd9fb0870f77877b7c4c7e38a19e0
+    test_patch: "diff --git a/tests/test_basic.py b/tests/test_basic.py\n--- a/tests/test_basic.py\n+++ b/tests/test_basic.py\n@@ -1631,7 +1631,7 @@ def something_else():\n \n \n def test_inject_blueprint_url_defaults(app):\n\
+      -    bp = flask.Blueprint(\"foo.bar.baz\", __name__, template_folder=\"template\")\n+    bp = flask.Blueprint(\"foo\", __name__, template_folder=\"template\")\n \n     @bp.url_defaults\n     def bp_defaults(endpoint,\
+      \ values):\n@@ -1644,12 +1644,12 @@ def view(page):\n     app.register_blueprint(bp)\n \n     values = dict()\n-    app.inject_url_defaults(\"foo.bar.baz.view\", values)\n+    app.inject_url_defaults(\"\
+      foo.view\", values)\n     expected = dict(page=\"login\")\n     assert values == expected\n \n     with app.test_request_context(\"/somepage\"):\n-        url = flask.url_for(\"foo.bar.baz.view\"\
+      )\n+        url = flask.url_for(\"foo.view\")\n     expected = \"/login\"\n     assert url == expected\n \ndiff --git a/tests/test_blueprints.py b/tests/test_blueprints.py\n--- a/tests/test_blueprints.py\n\
+      +++ b/tests/test_blueprints.py\n@@ -1,5 +1,3 @@\n-import functools\n-\n import pytest\n from jinja2 import TemplateNotFound\n from werkzeug.http import parse_cache_control_header\n@@ -253,28 +251,9\
+      \ @@ def test_templates_list(test_apps):\n     assert templates == [\"admin/index.html\", \"frontend/index.html\"]\n \n \n-def test_dotted_names(app, client):\n-    frontend = flask.Blueprint(\"myapp.frontend\"\
+      , __name__)\n-    backend = flask.Blueprint(\"myapp.backend\", __name__)\n-\n-    @frontend.route(\"/fe\")\n-    def frontend_index():\n-        return flask.url_for(\"myapp.backend.backend_index\"\
+      )\n-\n-    @frontend.route(\"/fe2\")\n-    def frontend_page2():\n-        return flask.url_for(\".frontend_index\")\n-\n-    @backend.route(\"/be\")\n-    def backend_index():\n-        return flask.url_for(\"\
+      myapp.frontend.frontend_index\")\n-\n-    app.register_blueprint(frontend)\n-    app.register_blueprint(backend)\n-\n-    assert client.get(\"/fe\").data.strip() == b\"/be\"\n-    assert client.get(\"\
+      /fe2\").data.strip() == b\"/fe\"\n-    assert client.get(\"/be\").data.strip() == b\"/fe\"\n+def test_dotted_name_not_allowed(app, client):\n+    with pytest.raises(ValueError):\n+        flask.Blueprint(\"\
+      app.ui\", __name__)\n \n \n def test_dotted_names_from_app(app, client):\n@@ -343,62 +322,19 @@ def index():\n def test_route_decorator_custom_endpoint_with_dots(app, client):\n     bp = flask.Blueprint(\"\
+      bp\", __name__)\n \n-    @bp.route(\"/foo\")\n-    def foo():\n-        return flask.request.endpoint\n-\n-    try:\n-\n-        @bp.route(\"/bar\", endpoint=\"bar.bar\")\n-        def foo_bar():\n\
+      -            return flask.request.endpoint\n-\n-    except AssertionError:\n-        pass\n-    else:\n-        raise AssertionError(\"expected AssertionError not raised\")\n-\n-    try:\n-\n-   \
+      \     @bp.route(\"/bar/123\", endpoint=\"bar.123\")\n-        def foo_bar_foo():\n-            return flask.request.endpoint\n-\n-    except AssertionError:\n-        pass\n-    else:\n-        raise\
+      \ AssertionError(\"expected AssertionError not raised\")\n-\n-    def foo_foo_foo():\n-        pass\n-\n-    pytest.raises(\n-        AssertionError,\n-        lambda: bp.add_url_rule(\"/bar/123\"\
+      , endpoint=\"bar.123\", view_func=foo_foo_foo),\n-    )\n-\n-    pytest.raises(\n-        AssertionError, bp.route(\"/bar/123\", endpoint=\"bar.123\"), lambda: None\n-    )\n-\n-    foo_foo_foo.__name__\
+      \ = \"bar.123\"\n+    with pytest.raises(ValueError):\n+        bp.route(\"/\", endpoint=\"a.b\")(lambda: \"\")\n \n-    pytest.raises(\n-        AssertionError, lambda: bp.add_url_rule(\"/bar/123\"\
+      , view_func=foo_foo_foo)\n-    )\n+    with pytest.raises(ValueError):\n+        bp.add_url_rule(\"/\", endpoint=\"a.b\")\n \n-    bp.add_url_rule(\n-        \"/bar/456\", endpoint=\"foofoofoo\",\
+      \ view_func=functools.partial(foo_foo_foo)\n-    )\n+    def view():\n+        return \"\"\n \n-    app.register_blueprint(bp, url_prefix=\"/py\")\n+    view.__name__ = \"a.b\"\n \n-    assert client.get(\"\
+      /py/foo\").data == b\"bp.foo\"\n-    # The rule's didn't actually made it through\n-    rv = client.get(\"/py/bar\")\n-    assert rv.status_code == 404\n-    rv = client.get(\"/py/bar/123\")\n-  \
+      \  assert rv.status_code == 404\n+    with pytest.raises(ValueError):\n+        bp.add_url_rule(\"/\", view_func=view)\n \n \n def test_endpoint_decorator(app, client):\n"
+    fail_to_pass: '["tests/test_blueprints.py::test_dotted_name_not_allowed", "tests/test_blueprints.py::test_route_decorator_custom_endpoint_with_dots"]'
+    pass_to_pass: '["tests/test_basic.py::test_method_route_no_methods", "tests/test_basic.py::test_disallow_string_for_allowed_methods", "tests/test_basic.py::test_error_handler_unknown_code", "tests/test_basic.py::test_request_locals",
+      "tests/test_basic.py::test_exception_propagation", "tests/test_basic.py::test_werkzeug_passthrough_errors[None-True-True-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[None-True-True-False]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[None-True-False-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[None-True-False-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[None-False-True-True]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[None-False-True-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[None-False-False-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[None-False-False-False]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[True-True-True-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[True-True-True-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[True-True-False-True]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[True-True-False-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[True-False-True-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[True-False-True-False]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[True-False-False-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[True-False-False-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[False-True-True-True]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[False-True-True-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[False-True-False-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[False-True-False-False]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[False-False-True-True]", "tests/test_basic.py::test_werkzeug_passthrough_errors[False-False-True-False]", "tests/test_basic.py::test_werkzeug_passthrough_errors[False-False-False-True]",
+      "tests/test_basic.py::test_werkzeug_passthrough_errors[False-False-False-False]", "tests/test_basic.py::test_get_method_on_g", "tests/test_basic.py::test_g_iteration_protocol", "tests/test_basic.py::test_run_defaults",
+      "tests/test_basic.py::test_run_server_port", "tests/test_basic.py::test_run_from_config[None-None-pocoo.org:8080-pocoo.org-8080]", "tests/test_basic.py::test_run_from_config[localhost-None-pocoo.org:8080-localhost-8080]",
+      "tests/test_basic.py::test_run_from_config[None-80-pocoo.org:8080-pocoo.org-80]", "tests/test_basic.py::test_run_from_config[localhost-80-pocoo.org:8080-localhost-80]", "tests/test_basic.py::test_run_from_config[localhost-0-localhost:8080-localhost-0]",
+      "tests/test_basic.py::test_run_from_config[None-None-localhost:8080-localhost-8080]", "tests/test_basic.py::test_run_from_config[None-None-localhost:0-localhost-0]", "tests/test_basic.py::test_app_freed_on_zero_refcount",
+      "tests/test_blueprints.py::test_template_filter", "tests/test_blueprints.py::test_add_template_filter", "tests/test_blueprints.py::test_template_filter_with_name", "tests/test_blueprints.py::test_add_template_filter_with_name",
+      "tests/test_blueprints.py::test_template_test", "tests/test_blueprints.py::test_add_template_test", "tests/test_blueprints.py::test_template_test_with_name", "tests/test_blueprints.py::test_add_template_test_with_name",
+      "tests/test_blueprints.py::test_template_global"]'
+- id: psf__requests-2674
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nurllib3 exceptions passing through requests API\nI don't know if it's a design goal of requests to hide urllib3's exceptions and wrap\
+    \ them around requests.exceptions types.\n\n(If it's not IMHO it should be, but that's another discussion)\n\nIf it is, I have at least two of them passing through that I have to catch in addition to\
+    \ requests' exceptions. They are requests.packages.urllib3.exceptions.DecodeError and requests.packages.urllib3.exceptions.TimeoutError (this one I get when a proxy timeouts)\n\nThanks!\n\n\n\n## Hints\n\
+    \nI definitely agree with you and would agree that these should be wrapped.\n\nCould you give us stack-traces so we can find where they're bleeding through?\n\nSorry I don't have stack traces readily\
+    \ available :/\n\nNo worries. I have ideas as to where the DecodeError might be coming from but I'm not certain where the TimeoutError could be coming from.\n\nIf you run into them again, please save\
+    \ us the stack traces. =) Thanks for reporting them. (We'll never know what we're missing until someone tells us.)\n\n`TimeoutError` is almost certainly being raised from either [`HTTPConnectionPool.urlopen()`](https://github.com/kennethreitz/requests/blob/master/requests/adapters.py#L282-L293)\
+    \ or from [`HTTPConnection.putrequest()`](https://github.com/kennethreitz/requests/blob/master/requests/adapters.py#L301). Adding a new clause to [here](https://github.com/kennethreitz/requests/blob/master/requests/adapters.py#L323-L335)\
+    \ should cover us.\n\nActually, that can't be right, we should be catching and rethrowing as a Requests `Timeout` exception in that block. Hmm, I'll do another spin through the code to see if I can\
+    \ see the problem.\n\nYeah, a quick search of the `urllib3` code reveals that the only place that `TimeoutError`s are thrown is from `HTTPConnectionPool.urlopen()`. These should not be leaking. We really\
+    \ need a stack trace to track this down.\n\nI've added a few logs to get the traces if they happen again. What may have confused me for the TimeoutError is that requests' Timeout actually wraps the\
+    \ urllib3's TimeoutError and we were logging the content of the error as well. \n\nSo DecodeError was definitely being thrown but probably not TimeoutError, sorry for the confusion. I'll report here\
+    \ it I ever see it happening now that we're watching for it.\n\nThanks for the help!\n\nI also got urllib3 exceptions passing through when use Session in several threads, trace:\n\n```\n......\n  File\
+    \ \"C:\\Python27\\lib\\site-packages\\requests\\sessions.py\", line 347, in get\n    return self.request('GET', url, **kwargs)\n  File \"C:\\Python27\\lib\\site-packages\\requests\\sessions.py\", line\
+    \ 335, in request\n    resp = self.send(prep, **send_kwargs)\n  File \"C:\\Python27\\lib\\site-packages\\requests\\sessions.py\", line 438, in send\n    r = adapter.send(request, **kwargs)\n  File \"\
+    C:\\Python27\\lib\\site-packages\\requests\\adapters.py\", line 292, in send\n    timeout=timeout\n  File \"C:\\Python27\\lib\\site-packages\\requests\\packages\\urllib3\\connectionpool.py\", line 423,\
+    \ in url\nopen\n    conn = self._get_conn(timeout=pool_timeout)\n  File \"C:\\Python27\\lib\\site-packages\\requests\\packages\\urllib3\\connectionpool.py\", line 224, in _ge\nt_conn\n    raise ClosedPoolError(self,\
+    \ \"Pool is closed.\")\nClosedPoolError: HTTPConnectionPool(host='......', port=80): Pool is closed.\n```\n\nAh, we should rewrap that `ClosedPoolError` too.\n\nBut it's still the summer... How can\
+    \ any pool be closed? :smirk_cat: \n\nBut yes :+1:\n\nI've added a fix for the `ClosedPoolError` to #1475. Which apparently broke in the last month for no adequately understandable reason.\n\nIf it's\
+    \ still needed, here is the traceback of DecodeError I got using proxy on requests 2.0.0:\n\n```\nTraceback (most recent call last):\n  File \"/home/krat/Projects/Grubhub/source/Pit/pit/web.py\", line\
+    \ 52, in request\n    response = session.request(method, url, **kw)\n  File \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/sessions.py\", line 357, in request\n    resp\
+    \ = self.send(prep, **send_kwargs)\n  File \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/sessions.py\", line 460, in send\n    r = adapter.send(request, **kwargs)\n  File\
+    \ \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/adapters.py\", line 367, in send\n    r.content\n  File \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/models.py\"\
+    , line 633, in content\n    self._content = bytes().join(self.iter_content(CONTENT_CHUNK_SIZE)) or bytes()\n  File \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/models.py\"\
+    , line 572, in generate\n    decode_content=True):\n  File \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/packages/urllib3/response.py\", line 225, in stream\n    data\
+    \ = self.read(amt=amt, decode_content=decode_content)\n  File \"/home/krat/.virtualenvs/grubhub/local/lib/python2.7/site-packages/requests/packages/urllib3/response.py\", line 193, in read\n    e)\n\
+    DecodeError: ('Received response with content-encoding: gzip, but failed to decode it.', error('Error -3 while decompressing: incorrect header check',))\n```\n\nSlightly different to the above, but\
+    \ urllib3's LocationParseError leaks through which could probably do with being wrapped in InvalidURL.\n\n```\nTraceback (most recent call last):\n  File \"/home/oliver/wc/trunk/mtmCore/python/asagent/samplers/net/web.py\"\
+    , line 255, in process_url\n    resp = self.request(self.params.httpverb, url, data=data)\n  File \"/home/oliver/wc/trunk/mtmCore/python/asagent/samplers/net/web.py\", line 320, in request\n    verb,\
+    \ url, data=data))\n  File \"abilisoft/requests/opt/abilisoft.com/thirdparty/requests/lib/python2.7/site-packages/requests/sessions.py\", line 286, in prepare_request\n  File \"abilisoft/requests/opt/abilisoft.com/thirdparty/requests/lib/python2.7/site-packages/requests/models.py\"\
+    , line 286, in prepare\n  File \"abilisoft/requests/opt/abilisoft.com/thirdparty/requests/lib/python2.7/site-packages/requests/models.py\", line 333, in prepare_url\n  File \"abilisoft/requests/opt/abilisoft.com/thirdparty/requests/lib/python2.7/site-packages/requests/packages/urllib3/util.py\"\
+    , line 397, in parse_url\nLocationParseError: Failed to parse: Failed to parse: fe80::5054:ff:fe5a:fc0\n```\n\n\nMake the minimal code changes needed to fix the issue. All existing tests must still\
+    \ pass after your fix."
+  repos:
+  - psf__requests
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/pytest -xvs 'test_requests.py::RequestsTestCase::test_BASICAUTH_TUPLE_HTTP_200_OK_GET' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_ALTERNATIVE' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_WITH_PARAMS'
+    'test_requests.py::RequestsTestCase::test_HTTP_200_OK_HEAD' 'test_requests.py::RequestsTestCase::test_auth_is_retained_for_redirect_on_host' 'test_requests.py::RequestsTestCase::test_different_encodings_dont_break_post'
+    'test_requests.py::RequestsTestCase::test_manual_redirect_with_partial_body_read' 'test_requests.py::RequestsTestCase::test_mixed_case_scheme_acceptable' 'test_requests.py::RequestsTestCase::test_prepared_from_session'
+    'test_requests.py::RequestsTestCase::test_unicode_multipart_post' 'test_requests.py::TestTimeout::test_none_timeout' 'test_requests.py::TestTimeout::test_encoded_methods'
+  metadata:
+    base_commit: 0be38a0c37c59c4b66ce908731da15b401655113
+    test_patch: "diff --git a/test_requests.py b/test_requests.py\n--- a/test_requests.py\n+++ b/test_requests.py\n@@ -1655,6 +1655,16 @@ def test_urllib3_retries():\n     with pytest.raises(RetryError):\n\
+      \         s.get(httpbin('status/500'))\n \n+\n+def test_urllib3_pool_connection_closed():\n+    s = requests.Session()\n+    s.mount('http://', HTTPAdapter(pool_connections=0, pool_maxsize=0))\n+\n\
+      +    try:\n+        s.get(httpbin('status/200'))\n+    except ConnectionError as e:\n+        assert u\"HTTPConnectionPool(host='httpbin.org', port=80): Pool is closed.\" in str(e.message)\n+\n def\
+      \ test_vendor_aliases():\n     from requests.packages import urllib3\n     from requests.packages import chardet\n"
+    fail_to_pass: '["test_requests.py::RequestsTestCase::test_BASICAUTH_TUPLE_HTTP_200_OK_GET", "test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_ALTERNATIVE", "test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_WITH_PARAMS",
+      "test_requests.py::RequestsTestCase::test_HTTP_200_OK_HEAD", "test_requests.py::RequestsTestCase::test_auth_is_retained_for_redirect_on_host", "test_requests.py::RequestsTestCase::test_different_encodings_dont_break_post",
+      "test_requests.py::RequestsTestCase::test_manual_redirect_with_partial_body_read", "test_requests.py::RequestsTestCase::test_mixed_case_scheme_acceptable", "test_requests.py::RequestsTestCase::test_prepared_from_session",
+      "test_requests.py::RequestsTestCase::test_unicode_multipart_post", "test_requests.py::TestTimeout::test_none_timeout", "test_requests.py::TestTimeout::test_encoded_methods"]'
+    pass_to_pass: '["test_requests.py::RequestsTestCase::test_DIGESTAUTH_QUOTES_QOP_VALUE", "test_requests.py::RequestsTestCase::test_DIGESTAUTH_WRONG_HTTP_401_GET", "test_requests.py::RequestsTestCase::test_DIGEST_AUTH_RETURNS_COOKIE",
+      "test_requests.py::RequestsTestCase::test_DIGEST_AUTH_SETS_SESSION_COOKIES", "test_requests.py::RequestsTestCase::test_DIGEST_STREAM", "test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_WITH_MIXED_PARAMS",
+      "test_requests.py::RequestsTestCase::test_HTTP_200_OK_PUT", "test_requests.py::RequestsTestCase::test_LocationParseError", "test_requests.py::RequestsTestCase::test_POSTBIN_GET_POST_FILES", "test_requests.py::RequestsTestCase::test_POSTBIN_GET_POST_FILES_WITH_DATA",
+      "test_requests.py::RequestsTestCase::test_auth_is_stripped_on_redirect_off_host", "test_requests.py::RequestsTestCase::test_autoset_header_values_are_native", "test_requests.py::RequestsTestCase::test_basic_auth_str_is_always_native",
+      "test_requests.py::RequestsTestCase::test_basic_building", "test_requests.py::RequestsTestCase::test_basicauth_with_netrc", "test_requests.py::RequestsTestCase::test_can_send_bytes_bytearray_objects_with_files",
+      "test_requests.py::RequestsTestCase::test_can_send_file_object_with_non_string_filename", "test_requests.py::RequestsTestCase::test_can_send_nonstring_objects_with_files", "test_requests.py::RequestsTestCase::test_cannot_send_unprepared_requests",
+      "test_requests.py::RequestsTestCase::test_connection_error_invalid_domain", "test_requests.py::RequestsTestCase::test_connection_error_invalid_port", "test_requests.py::RequestsTestCase::test_cookie_as_dict_items",
+      "test_requests.py::RequestsTestCase::test_cookie_as_dict_keeps_items", "test_requests.py::RequestsTestCase::test_cookie_as_dict_keeps_len", "test_requests.py::RequestsTestCase::test_cookie_as_dict_keys",
+      "test_requests.py::RequestsTestCase::test_cookie_as_dict_values", "test_requests.py::RequestsTestCase::test_cookie_parameters", "test_requests.py::RequestsTestCase::test_cookie_persists_via_api",
+      "test_requests.py::RequestsTestCase::test_cookie_quote_wrapped", "test_requests.py::RequestsTestCase::test_cookie_removed_on_expire", "test_requests.py::RequestsTestCase::test_custom_content_type",
+      "test_requests.py::RequestsTestCase::test_decompress_gzip", "test_requests.py::RequestsTestCase::test_entry_points", "test_requests.py::RequestsTestCase::test_fixes_1329", "test_requests.py::RequestsTestCase::test_generic_cookiejar_works",
+      "test_requests.py::RequestsTestCase::test_get_auth_from_url", "test_requests.py::RequestsTestCase::test_get_auth_from_url_encoded_hashes", "test_requests.py::RequestsTestCase::test_get_auth_from_url_encoded_spaces",
+      "test_requests.py::RequestsTestCase::test_get_auth_from_url_not_encoded_spaces", "test_requests.py::RequestsTestCase::test_get_auth_from_url_percent_chars", "test_requests.py::RequestsTestCase::test_header_keys_are_native",
+      "test_requests.py::RequestsTestCase::test_header_remove_is_case_insensitive", "test_requests.py::RequestsTestCase::test_headers_on_session_with_None_are_not_sent", "test_requests.py::RequestsTestCase::test_history_is_always_a_list",
+      "test_requests.py::RequestsTestCase::test_hook_receives_request_arguments", "test_requests.py::RequestsTestCase::test_http_error", "test_requests.py::RequestsTestCase::test_invalid_url", "test_requests.py::RequestsTestCase::test_json_param_post_content_type_works",
+      "test_requests.py::RequestsTestCase::test_links", "test_requests.py::RequestsTestCase::test_long_authinfo_in_url", "test_requests.py::RequestsTestCase::test_no_content_length", "test_requests.py::RequestsTestCase::test_nonhttp_schemes_dont_check_URLs",
+      "test_requests.py::RequestsTestCase::test_override_content_length", "test_requests.py::RequestsTestCase::test_params_are_added_before_fragment", "test_requests.py::RequestsTestCase::test_params_are_merged_case_sensitive",
+      "test_requests.py::RequestsTestCase::test_path_is_not_double_encoded", "test_requests.py::RequestsTestCase::test_prepare_request_with_bytestring_url", "test_requests.py::RequestsTestCase::test_prepared_request_hook",
+      "test_requests.py::RequestsTestCase::test_pyopenssl_redirect", "test_requests.py::RequestsTestCase::test_redirect_with_wrong_gzipped_header", "test_requests.py::RequestsTestCase::test_request_and_response_are_pickleable",
+      "test_requests.py::RequestsTestCase::test_request_cookie_overrides_session_cookie", "test_requests.py::RequestsTestCase::test_request_cookies_not_persisted", "test_requests.py::RequestsTestCase::test_request_ok_set",
+      "test_requests.py::RequestsTestCase::test_requests_in_history_are_not_overridden", "test_requests.py::RequestsTestCase::test_response_decode_unicode", "test_requests.py::RequestsTestCase::test_response_is_iterable",
+      "test_requests.py::RequestsTestCase::test_response_iter_lines", "test_requests.py::RequestsTestCase::test_session_hooks_are_overriden_by_request_hooks", "test_requests.py::RequestsTestCase::test_session_hooks_are_used_with_no_request_hooks",
+      "test_requests.py::RequestsTestCase::test_session_pickling", "test_requests.py::RequestsTestCase::test_set_cookie_on_301", "test_requests.py::RequestsTestCase::test_status_raising", "test_requests.py::RequestsTestCase::test_time_elapsed_blank",
+      "test_requests.py::RequestsTestCase::test_transport_adapter_ordering", "test_requests.py::RequestsTestCase::test_unconsumed_session_response_closes_connection", "test_requests.py::RequestsTestCase::test_unicode_get",
+      "test_requests.py::RequestsTestCase::test_unicode_header_name", "test_requests.py::RequestsTestCase::test_unicode_method_name", "test_requests.py::RequestsTestCase::test_unicode_multipart_post_fieldnames",
+      "test_requests.py::RequestsTestCase::test_uppercase_scheme_redirect", "test_requests.py::RequestsTestCase::test_urlencoded_get_query_multivalued_param", "test_requests.py::RequestsTestCase::test_user_agent_transfers",
+      "test_requests.py::TestContentEncodingDetection::test_html4_pragma", "test_requests.py::TestContentEncodingDetection::test_html_charset", "test_requests.py::TestContentEncodingDetection::test_none",
+      "test_requests.py::TestContentEncodingDetection::test_precedence", "test_requests.py::TestContentEncodingDetection::test_xhtml_pragma", "test_requests.py::TestContentEncodingDetection::test_xml",
+      "test_requests.py::TestCaseInsensitiveDict::test_contains", "test_requests.py::TestCaseInsensitiveDict::test_copy", "test_requests.py::TestCaseInsensitiveDict::test_delitem", "test_requests.py::TestCaseInsensitiveDict::test_docstring_example",
+      "test_requests.py::TestCaseInsensitiveDict::test_equality", "test_requests.py::TestCaseInsensitiveDict::test_fixes_649", "test_requests.py::TestCaseInsensitiveDict::test_get", "test_requests.py::TestCaseInsensitiveDict::test_getitem",
+      "test_requests.py::TestCaseInsensitiveDict::test_iter", "test_requests.py::TestCaseInsensitiveDict::test_iterable_init", "test_requests.py::TestCaseInsensitiveDict::test_kwargs_init", "test_requests.py::TestCaseInsensitiveDict::test_len",
+      "test_requests.py::TestCaseInsensitiveDict::test_lower_items", "test_requests.py::TestCaseInsensitiveDict::test_mapping_init", "test_requests.py::TestCaseInsensitiveDict::test_preserve_key_case",
+      "test_requests.py::TestCaseInsensitiveDict::test_preserve_last_key_case", "test_requests.py::TestCaseInsensitiveDict::test_repr", "test_requests.py::TestCaseInsensitiveDict::test_setdefault", "test_requests.py::TestCaseInsensitiveDict::test_update",
+      "test_requests.py::TestCaseInsensitiveDict::test_update_retains_unchanged", "test_requests.py::UtilsTestCase::test_address_in_network", "test_requests.py::UtilsTestCase::test_dotted_netmask", "test_requests.py::UtilsTestCase::test_get_auth_from_url",
+      "test_requests.py::UtilsTestCase::test_get_environ_proxies", "test_requests.py::UtilsTestCase::test_get_environ_proxies_ip_ranges", "test_requests.py::UtilsTestCase::test_guess_filename_when_filename_is_an_int",
+      "test_requests.py::UtilsTestCase::test_guess_filename_when_int", "test_requests.py::UtilsTestCase::test_guess_filename_with_file_like_obj", "test_requests.py::UtilsTestCase::test_guess_filename_with_unicode_name",
+      "test_requests.py::UtilsTestCase::test_is_ipv4_address", "test_requests.py::UtilsTestCase::test_is_valid_cidr", "test_requests.py::UtilsTestCase::test_requote_uri_properly_requotes", "test_requests.py::UtilsTestCase::test_requote_uri_with_unquoted_percents",
+      "test_requests.py::UtilsTestCase::test_super_len_io_streams", "test_requests.py::TestMorselToCookieExpires::test_expires_invalid_int", "test_requests.py::TestMorselToCookieExpires::test_expires_invalid_str",
+      "test_requests.py::TestMorselToCookieExpires::test_expires_none", "test_requests.py::TestMorselToCookieExpires::test_expires_valid_str", "test_requests.py::TestMorselToCookieMaxAge::test_max_age_invalid_str",
+      "test_requests.py::TestMorselToCookieMaxAge::test_max_age_valid_int", "test_requests.py::TestTimeout::test_stream_timeout", "test_requests.py::TestTimeout::test_invalid_timeout", "test_requests.py::TestTimeout::test_read_timeout",
+      "test_requests.py::TestTimeout::test_connect_timeout", "test_requests.py::TestTimeout::test_total_timeout_connect", "test_requests.py::TestRedirects::test_requests_are_updated_each_time", "test_requests.py::test_data_argument_accepts_tuples",
+      "test_requests.py::test_prepared_request_empty_copy", "test_requests.py::test_prepared_request_no_cookies_copy", "test_requests.py::test_prepared_request_complete_copy", "test_requests.py::test_prepare_unicode_url",
+      "test_requests.py::test_urllib3_retries", "test_requests.py::test_vendor_aliases"]'
+- id: pytest-dev__pytest-5221
+  prompt: 'Fix the following issue in this repository.
+
+
+    ## Issue
+
+
+    Display fixture scope with `pytest --fixtures`
+
+    It would be useful to show fixture scopes with `pytest --fixtures`; currently the only way to learn the scope of a fixture is look at the docs (when that is documented) or at the source code.
+
+
+
+    Make the minimal code changes needed to fix the issue. All existing tests must still pass after your fix.'
+  repos:
+  - pytest-dev__pytest
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/pytest -xvs 'testing/python/fixtures.py::TestShowFixtures::test_show_fixtures' 'testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_verbose'
+  metadata:
+    base_commit: 4a2fdce62b73944030cff9b3e52862868ca9584d
+    test_patch: "diff --git a/testing/python/fixtures.py b/testing/python/fixtures.py\n--- a/testing/python/fixtures.py\n+++ b/testing/python/fixtures.py\n@@ -3037,11 +3037,25 @@ def test_funcarg_compat(self,\
+      \ testdir):\n \n     def test_show_fixtures(self, testdir):\n         result = testdir.runpytest(\"--fixtures\")\n-        result.stdout.fnmatch_lines([\"*tmpdir*\", \"*temporary directory*\"])\n\
+      +        result.stdout.fnmatch_lines(\n+            [\n+                \"tmpdir_factory [[]session scope[]]\",\n+                \"*for the test session*\",\n+                \"tmpdir\",\n+     \
+      \           \"*temporary directory*\",\n+            ]\n+        )\n \n     def test_show_fixtures_verbose(self, testdir):\n         result = testdir.runpytest(\"--fixtures\", \"-v\")\n-        result.stdout.fnmatch_lines([\"\
+      *tmpdir*--*tmpdir.py*\", \"*temporary directory*\"])\n+        result.stdout.fnmatch_lines(\n+            [\n+                \"tmpdir_factory [[]session scope[]] -- *tmpdir.py*\",\n+            \
+      \    \"*for the test session*\",\n+                \"tmpdir -- *tmpdir.py*\",\n+                \"*temporary directory*\",\n+            ]\n+        )\n \n     def test_show_fixtures_testmodule(self,\
+      \ testdir):\n         p = testdir.makepyfile(\n"
+    fail_to_pass: '["testing/python/fixtures.py::TestShowFixtures::test_show_fixtures", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_verbose"]'
+    pass_to_pass: '["testing/python/fixtures.py::test_getfuncargnames", "testing/python/fixtures.py::TestFillFixtures::test_fillfuncargs_exposed", "testing/python/fixtures.py::TestShowFixtures::test_fixture_disallow_twice",
+      "testing/python/fixtures.py::test_call_fixture_function_error", "testing/python/fixtures.py::TestFillFixtures::test_funcarg_lookupfails", "testing/python/fixtures.py::TestFillFixtures::test_detect_recursive_dependency_error",
+      "testing/python/fixtures.py::TestFillFixtures::test_funcarg_basic", "testing/python/fixtures.py::TestFillFixtures::test_funcarg_lookup_modulelevel", "testing/python/fixtures.py::TestFillFixtures::test_funcarg_lookup_classlevel",
+      "testing/python/fixtures.py::TestFillFixtures::test_conftest_funcargs_only_available_in_subdir", "testing/python/fixtures.py::TestFillFixtures::test_extend_fixture_module_class", "testing/python/fixtures.py::TestFillFixtures::test_extend_fixture_conftest_module",
+      "testing/python/fixtures.py::TestFillFixtures::test_extend_fixture_conftest_conftest", "testing/python/fixtures.py::TestFillFixtures::test_extend_fixture_conftest_plugin", "testing/python/fixtures.py::TestFillFixtures::test_extend_fixture_plugin_plugin",
+      "testing/python/fixtures.py::TestFillFixtures::test_override_parametrized_fixture_conftest_module", "testing/python/fixtures.py::TestFillFixtures::test_override_parametrized_fixture_conftest_conftest",
+      "testing/python/fixtures.py::TestFillFixtures::test_override_non_parametrized_fixture_conftest_module", "testing/python/fixtures.py::TestFillFixtures::test_override_non_parametrized_fixture_conftest_conftest",
+      "testing/python/fixtures.py::TestFillFixtures::test_override_autouse_fixture_with_parametrized_fixture_conftest_conftest", "testing/python/fixtures.py::TestFillFixtures::test_autouse_fixture_plugin",
+      "testing/python/fixtures.py::TestFillFixtures::test_funcarg_lookup_error", "testing/python/fixtures.py::TestFillFixtures::test_fixture_excinfo_leak", "testing/python/fixtures.py::TestRequestBasic::test_request_attributes",
+      "testing/python/fixtures.py::TestRequestBasic::test_request_attributes_method", "testing/python/fixtures.py::TestRequestBasic::test_request_contains_funcarg_arg2fixturedefs", "testing/python/fixtures.py::TestRequestBasic::test_request_garbage",
+      "testing/python/fixtures.py::TestRequestBasic::test_getfixturevalue_recursive", "testing/python/fixtures.py::TestRequestBasic::test_getfixturevalue_teardown", "testing/python/fixtures.py::TestRequestBasic::test_getfixturevalue[getfixturevalue]",
+      "testing/python/fixtures.py::TestRequestBasic::test_getfixturevalue[getfuncargvalue]", "testing/python/fixtures.py::TestRequestBasic::test_request_addfinalizer", "testing/python/fixtures.py::TestRequestBasic::test_request_addfinalizer_failing_setup",
+      "testing/python/fixtures.py::TestRequestBasic::test_request_addfinalizer_failing_setup_module", "testing/python/fixtures.py::TestRequestBasic::test_request_addfinalizer_partial_setup_failure", "testing/python/fixtures.py::TestRequestBasic::test_request_subrequest_addfinalizer_exceptions",
+      "testing/python/fixtures.py::TestRequestBasic::test_request_getmodulepath", "testing/python/fixtures.py::TestRequestBasic::test_request_fixturenames", "testing/python/fixtures.py::TestRequestBasic::test_request_fixturenames_dynamic_fixture",
+      "testing/python/fixtures.py::TestRequestBasic::test_funcargnames_compatattr", "testing/python/fixtures.py::TestRequestBasic::test_setupdecorator_and_xunit", "testing/python/fixtures.py::TestRequestBasic::test_fixtures_sub_subdir_normalize_sep",
+      "testing/python/fixtures.py::TestRequestBasic::test_show_fixtures_color_yes", "testing/python/fixtures.py::TestRequestBasic::test_newstyle_with_request", "testing/python/fixtures.py::TestRequestBasic::test_setupcontext_no_param",
+      "testing/python/fixtures.py::TestRequestMarking::test_applymarker", "testing/python/fixtures.py::TestRequestMarking::test_accesskeywords", "testing/python/fixtures.py::TestRequestMarking::test_accessmarker_dynamic",
+      "testing/python/fixtures.py::TestFixtureUsages::test_noargfixturedec", "testing/python/fixtures.py::TestFixtureUsages::test_receives_funcargs", "testing/python/fixtures.py::TestFixtureUsages::test_receives_funcargs_scope_mismatch",
+      "testing/python/fixtures.py::TestFixtureUsages::test_receives_funcargs_scope_mismatch_issue660", "testing/python/fixtures.py::TestFixtureUsages::test_invalid_scope", "testing/python/fixtures.py::TestFixtureUsages::test_funcarg_parametrized_and_used_twice",
+      "testing/python/fixtures.py::TestFixtureUsages::test_factory_uses_unknown_funcarg_as_dependency_error", "testing/python/fixtures.py::TestFixtureUsages::test_factory_setup_as_classes_fails", "testing/python/fixtures.py::TestFixtureUsages::test_request_can_be_overridden",
+      "testing/python/fixtures.py::TestFixtureUsages::test_usefixtures_marker", "testing/python/fixtures.py::TestFixtureUsages::test_usefixtures_ini", "testing/python/fixtures.py::TestFixtureUsages::test_usefixtures_seen_in_showmarkers",
+      "testing/python/fixtures.py::TestFixtureUsages::test_request_instance_issue203", "testing/python/fixtures.py::TestFixtureUsages::test_fixture_parametrized_with_iterator", "testing/python/fixtures.py::TestFixtureUsages::test_setup_functions_as_fixtures",
+      "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_parsefactories_evil_objects_issue214", "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_parsefactories_conftest",
+      "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_parsefactories_conftest_and_module_and_class", "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_parsefactories_relative_node_ids",
+      "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_package_xunit_fixture", "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_package_fixture_complex", "testing/python/fixtures.py::TestFixtureManagerParseFactories::test_collect_custom_items",
+      "testing/python/fixtures.py::TestAutouseDiscovery::test_parsefactories_conftest", "testing/python/fixtures.py::TestAutouseDiscovery::test_two_classes_separated_autouse", "testing/python/fixtures.py::TestAutouseDiscovery::test_setup_at_classlevel",
+      "testing/python/fixtures.py::TestAutouseDiscovery::test_callables_nocode", "testing/python/fixtures.py::TestAutouseDiscovery::test_autouse_in_conftests", "testing/python/fixtures.py::TestAutouseDiscovery::test_autouse_in_module_and_two_classes",
+      "testing/python/fixtures.py::TestAutouseManagement::test_autouse_conftest_mid_directory", "testing/python/fixtures.py::TestAutouseManagement::test_funcarg_and_setup", "testing/python/fixtures.py::TestAutouseManagement::test_uses_parametrized_resource",
+      "testing/python/fixtures.py::TestAutouseManagement::test_session_parametrized_function", "testing/python/fixtures.py::TestAutouseManagement::test_class_function_parametrization_finalization", "testing/python/fixtures.py::TestAutouseManagement::test_scope_ordering",
+      "testing/python/fixtures.py::TestAutouseManagement::test_parametrization_setup_teardown_ordering", "testing/python/fixtures.py::TestAutouseManagement::test_ordering_autouse_before_explicit", "testing/python/fixtures.py::TestAutouseManagement::test_ordering_dependencies_torndown_first[p10-p00]",
+      "testing/python/fixtures.py::TestAutouseManagement::test_ordering_dependencies_torndown_first[p10-p01]", "testing/python/fixtures.py::TestAutouseManagement::test_ordering_dependencies_torndown_first[p11-p00]",
+      "testing/python/fixtures.py::TestAutouseManagement::test_ordering_dependencies_torndown_first[p11-p01]", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize", "testing/python/fixtures.py::TestFixtureMarker::test_multiple_parametrization_issue_736",
+      "testing/python/fixtures.py::TestFixtureMarker::test_override_parametrized_fixture_issue_979[''fixt,", "testing/python/fixtures.py::TestFixtureMarker::test_override_parametrized_fixture_issue_979[''fixt,val'']",
+      "testing/python/fixtures.py::TestFixtureMarker::test_override_parametrized_fixture_issue_979[[''fixt'',", "testing/python/fixtures.py::TestFixtureMarker::test_override_parametrized_fixture_issue_979[(''fixt'',",
+      "testing/python/fixtures.py::TestFixtureMarker::test_scope_session", "testing/python/fixtures.py::TestFixtureMarker::test_scope_session_exc", "testing/python/fixtures.py::TestFixtureMarker::test_scope_session_exc_two_fix",
+      "testing/python/fixtures.py::TestFixtureMarker::test_scope_exc", "testing/python/fixtures.py::TestFixtureMarker::test_scope_module_uses_session", "testing/python/fixtures.py::TestFixtureMarker::test_scope_module_and_finalizer",
+      "testing/python/fixtures.py::TestFixtureMarker::test_scope_mismatch_various", "testing/python/fixtures.py::TestFixtureMarker::test_register_only_with_mark", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize_and_scope",
+      "testing/python/fixtures.py::TestFixtureMarker::test_scope_mismatch", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize_separated_order", "testing/python/fixtures.py::TestFixtureMarker::test_module_parametrized_ordering",
+      "testing/python/fixtures.py::TestFixtureMarker::test_dynamic_parametrized_ordering", "testing/python/fixtures.py::TestFixtureMarker::test_class_ordering", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize_separated_order_higher_scope_first",
+      "testing/python/fixtures.py::TestFixtureMarker::test_parametrized_fixture_teardown_order", "testing/python/fixtures.py::TestFixtureMarker::test_fixture_finalizer", "testing/python/fixtures.py::TestFixtureMarker::test_class_scope_with_normal_tests",
+      "testing/python/fixtures.py::TestFixtureMarker::test_request_is_clean", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize_separated_lifecycle", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize_function_scoped_finalizers_called",
+      "testing/python/fixtures.py::TestFixtureMarker::test_finalizer_order_on_parametrization[session]", "testing/python/fixtures.py::TestFixtureMarker::test_finalizer_order_on_parametrization[function]",
+      "testing/python/fixtures.py::TestFixtureMarker::test_finalizer_order_on_parametrization[module]", "testing/python/fixtures.py::TestFixtureMarker::test_class_scope_parametrization_ordering", "testing/python/fixtures.py::TestFixtureMarker::test_parametrize_setup_function",
+      "testing/python/fixtures.py::TestFixtureMarker::test_fixture_marked_function_not_collected_as_test", "testing/python/fixtures.py::TestFixtureMarker::test_params_and_ids", "testing/python/fixtures.py::TestFixtureMarker::test_params_and_ids_yieldfixture",
+      "testing/python/fixtures.py::TestFixtureMarker::test_deterministic_fixture_collection", "testing/python/fixtures.py::TestRequestScopeAccess::test_setup[session--fspath", "testing/python/fixtures.py::TestRequestScopeAccess::test_setup[module-module",
+      "testing/python/fixtures.py::TestRequestScopeAccess::test_setup[class-module", "testing/python/fixtures.py::TestRequestScopeAccess::test_setup[function-module", "testing/python/fixtures.py::TestRequestScopeAccess::test_funcarg[session--fspath",
+      "testing/python/fixtures.py::TestRequestScopeAccess::test_funcarg[module-module", "testing/python/fixtures.py::TestRequestScopeAccess::test_funcarg[class-module", "testing/python/fixtures.py::TestRequestScopeAccess::test_funcarg[function-module",
+      "testing/python/fixtures.py::TestErrors::test_subfactory_missing_funcarg", "testing/python/fixtures.py::TestErrors::test_issue498_fixture_finalizer_failing", "testing/python/fixtures.py::TestErrors::test_setupfunc_missing_funcarg",
+      "testing/python/fixtures.py::TestShowFixtures::test_funcarg_compat", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_testmodule", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_conftest[True]",
+      "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_conftest[False]", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_trimmed_doc", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_indented_doc",
+      "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_indented_doc_first_line_unindented", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_indented_in_class", "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_different_files",
+      "testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_with_same_name", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_simple[fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_simple[yield_fixture]",
+      "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_scoped[fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_scoped[yield_fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_setup_exception[fixture]",
+      "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_setup_exception[yield_fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_teardown_exception[fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_teardown_exception[yield_fixture]",
+      "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_yields_more_than_one[fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_yields_more_than_one[yield_fixture]",
+      "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_custom_name[fixture]", "testing/python/fixtures.py::TestContextManagerFixtureFuncs::test_custom_name[yield_fixture]", "testing/python/fixtures.py::TestParameterizedSubRequest::test_call_from_fixture",
+      "testing/python/fixtures.py::TestParameterizedSubRequest::test_call_from_test", "testing/python/fixtures.py::TestParameterizedSubRequest::test_external_fixture", "testing/python/fixtures.py::TestParameterizedSubRequest::test_non_relative_path",
+      "testing/python/fixtures.py::test_pytest_fixture_setup_and_post_finalizer_hook", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_module_auto[mark]", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_module_auto[autouse]",
+      "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_with_native_fixtures", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_module", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_scopes_reordered",
+      "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_same_scope_closer_root_first", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_all_scopes_complex", "testing/python/fixtures.py::TestScopeOrdering::test_multiple_packages"]'
+- id: scikit-learn__scikit-learn-13497
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nComparing string to array in _estimate_mi\nIn ``_estimate_mi`` there is ``discrete_features == 'auto'`` but discrete features can be\
+    \ an array of indices or a boolean mask.\r\nThis will error in future versions of numpy.\r\nAlso this means we never test this function with discrete features != 'auto', it seems?\n\n\n## Hints\n\n\
+    I'll take this\n@hermidalc go for it :)\ni'm not sure ,but i think user will change the default value if it seem to be array or boolean mask....bcz auto is  default value it is not fixed.\nI haven't\
+    \ understood, @punkstar25 \n\nMake the minimal code changes needed to fix the issue. All existing tests must still pass after your fix."
+  repos:
+  - scikit-learn__scikit-learn
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/pytest -xvs 'sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_options'
+  metadata:
+    base_commit: 26f690961a52946dd2f53bf0fdd4264b2ae5be90
+    test_patch: "diff --git a/sklearn/feature_selection/tests/test_mutual_info.py b/sklearn/feature_selection/tests/test_mutual_info.py\n--- a/sklearn/feature_selection/tests/test_mutual_info.py\n+++ b/sklearn/feature_selection/tests/test_mutual_info.py\n\
+      @@ -183,18 +183,26 @@ def test_mutual_info_options():\n     X_csr = csr_matrix(X)\n \n     for mutual_info in (mutual_info_regression, mutual_info_classif):\n-        assert_raises(ValueError, mutual_info_regression,\
+      \ X_csr, y,\n+        assert_raises(ValueError, mutual_info, X_csr, y,\n                       discrete_features=False)\n+        assert_raises(ValueError, mutual_info, X, y,\n+                  \
+      \    discrete_features='manual')\n+        assert_raises(ValueError, mutual_info, X_csr, y,\n+                      discrete_features=[True, False, True])\n+        assert_raises(IndexError, mutual_info,\
+      \ X, y,\n+                      discrete_features=[True, False, True, False])\n+        assert_raises(IndexError, mutual_info, X, y, discrete_features=[1, 4])\n \n         mi_1 = mutual_info(X, y,\
+      \ discrete_features='auto', random_state=0)\n         mi_2 = mutual_info(X, y, discrete_features=False, random_state=0)\n-\n-        mi_3 = mutual_info(X_csr, y, discrete_features='auto',\n-     \
+      \                      random_state=0)\n-        mi_4 = mutual_info(X_csr, y, discrete_features=True,\n+        mi_3 = mutual_info(X_csr, y, discrete_features='auto', random_state=0)\n+        mi_4\
+      \ = mutual_info(X_csr, y, discrete_features=True, random_state=0)\n+        mi_5 = mutual_info(X, y, discrete_features=[True, False, True],\n                            random_state=0)\n+        mi_6\
+      \ = mutual_info(X, y, discrete_features=[0, 2], random_state=0)\n \n         assert_array_equal(mi_1, mi_2)\n         assert_array_equal(mi_3, mi_4)\n+        assert_array_equal(mi_5, mi_6)\n \n \
+      \    assert not np.allclose(mi_1, mi_3)\n"
+    fail_to_pass: '["sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_options"]'
+    pass_to_pass: '["sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_dd", "sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_cc", "sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_cd",
+      "sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_cd_unique_label", "sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_classif_discrete", "sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_regression",
+      "sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_classif_mixed"]'
+- id: sphinx-doc__sphinx-7975
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nTwo sections called Symbols in index\nWhen using index entries with the following leading characters: _@_, _\xA3_, and _\u2190_ I get\
+    \ two sections called _Symbols_ in the HTML output, the first containing all _@_ entries before \u201Dnormal\u201D words and the second containing _\xA3_ and _\u2190_ entries after the \u201Dnormal\u201D\
+    \ words.  Both have the same anchor in HTML so the links at the top of the index page contain two _Symbols_ links, one before the letters and one after, but both lead to the first section.\n\n\n\nMake\
+    \ the minimal code changes needed to fix the issue. All existing tests must still pass after your fix."
+  repos:
+  - sphinx-doc__sphinx
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/pytest -xvs 'tests/test_environment_indexentries.py::test_create_single_index'
+  metadata:
+    base_commit: 4ec6cbe341fd84468c448e20082c778043bbea4b
+    test_patch: "diff --git a/tests/test_environment_indexentries.py b/tests/test_environment_indexentries.py\n--- a/tests/test_environment_indexentries.py\n+++ b/tests/test_environment_indexentries.py\n\
+      @@ -25,12 +25,14 @@ def test_create_single_index(app):\n             \".. index:: \u0451\u043B\u043A\u0430\\n\"\n             \".. index:: \u200F\u05EA\u05D9\u05E8\u05D1\u05E2\u200E\\n\"\n       \
+      \      \".. index:: 9-symbol\\n\"\n-            \".. index:: &-symbol\\n\")\n+            \".. index:: &-symbol\\n\"\n+            \".. index:: \xA3100\\n\")\n     restructuredtext.parse(app, text)\n\
+      \     index = IndexEntries(app.env).create_index(app.builder)\n     assert len(index) == 6\n     assert index[0] == ('Symbols', [('&-symbol', [[('', '#index-9')], [], None]),\n-                  \
+      \                  ('9-symbol', [[('', '#index-8')], [], None])])\n+                                    ('9-symbol', [[('', '#index-8')], [], None]),\n+                                    ('\xA3100',\
+      \ [[('', '#index-10')], [], None])])\n     assert index[1] == ('D', [('docutils', [[('', '#index-0')], [], None])])\n     assert index[2] == ('P', [('pip', [[], [('install', [('', '#index-2')]),\n\
+      \                                             ('upgrade', [('', '#index-3')])], None]),\n"
+    fail_to_pass: '["tests/test_environment_indexentries.py::test_create_single_index"]'
+    pass_to_pass: '["tests/test_environment_indexentries.py::test_create_pair_index", "tests/test_environment_indexentries.py::test_create_triple_index", "tests/test_environment_indexentries.py::test_create_see_index",
+      "tests/test_environment_indexentries.py::test_create_seealso_index", "tests/test_environment_indexentries.py::test_create_main_index", "tests/test_environment_indexentries.py::test_create_index_with_name",
+      "tests/test_environment_indexentries.py::test_create_index_by_key"]'
+- id: sympy__sympy-15345
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nmathematica_code gives wrong output with Max\nIf I run the code\r\n\r\n```\r\nx = symbols('x')\r\nmathematica_code(Max(x,2))\r\n```\r\
+    \n\r\nthen I would expect the output `'Max[x,2]'` which is valid Mathematica code but instead I get `'Max(2, x)'` which is not valid Mathematica code.\n\n\n## Hints\n\nHi, I'm new (to the project and\
+    \ development in general, but I'm a long time Mathematica user) and have been looking into this problem.\r\n\r\nThe `mathematica.py` file goes thru a table of known functions (of which neither Mathematica\
+    \ `Max` or `Min` functions are in) that are specified with lowercase capitalization, so it might be that doing `mathematica_code(Max(x,2))` is just yielding the unevaluated expression of `mathematica_code`.\
+    \ But there is a problem when I do `mathematica_code(max(x,2))` I get an error occurring in the Relational class in `core/relational.py`\r\n\r\nStill checking it out, though.\n`max` (lowercase `m`)\
+    \ is the Python builtin which tries to compare the items directly and give a result. Since `x` and `2` cannot be compared, you get an error. `Max` is the SymPy version that can return unevaluated results.\
+    \ \n\nMake the minimal code changes needed to fix the issue. All existing tests must still pass after your fix."
+  repos:
+  - sympy__sympy
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/python -m pytest -xvs -k 'test_Function'
+  metadata:
+    base_commit: 9ef28fba5b4d6d0168237c9c005a550e6dc27d81
+    test_patch: "diff --git a/sympy/printing/tests/test_mathematica.py b/sympy/printing/tests/test_mathematica.py\n--- a/sympy/printing/tests/test_mathematica.py\n+++ b/sympy/printing/tests/test_mathematica.py\n\
+      @@ -2,7 +2,7 @@\n                         Rational, Integer, Tuple, Derivative)\n from sympy.integrals import Integral\n from sympy.concrete import Sum\n-from sympy.functions import exp, sin, cos,\
+      \ conjugate\n+from sympy.functions import exp, sin, cos, conjugate, Max, Min\n \n from sympy import mathematica_code as mcode\n \n@@ -28,6 +28,7 @@ def test_Function():\n     assert mcode(f(x, y,\
+      \ z)) == \"f[x, y, z]\"\n     assert mcode(sin(x) ** cos(x)) == \"Sin[x]^Cos[x]\"\n     assert mcode(conjugate(x)) == \"Conjugate[x]\"\n+    assert mcode(Max(x,y,z)*Min(y,z)) == \"Max[x, y, z]*Min[y,\
+      \ z]\"\n \n \n def test_Pow():\n"
+    fail_to_pass: '["test_Function"]'
+    pass_to_pass: '["test_Integer", "test_Rational", "test_Pow", "test_Mul", "test_constants", "test_containers", "test_Integral", "test_Derivative"]'
+- id: sympy__sympy-16503
+  prompt: "Fix the following issue in this repository.\n\n## Issue\n\nBad centering for Sum pretty print\n```\r\n>>> pprint(Sum(x, (x, 1, oo)) + 3)\r\n  \u221E\r\n ___\r\n \u2572\r\n  \u2572   x\r\n  \u2571\
+    \     + 3\r\n \u2571\r\n \u203E\u203E\u203E\r\nx = 1\r\n```\r\n\r\nThe `x` and the `+ 3` should be aligned. I'm not sure if the `x` should be lower of if the `+ 3` should be higher. \n\n\n## Hints\n\
+    \n```\r\n>>> pprint(Sum(x**2, (x, 1, oo)) + 3)\r\n \u221E         \r\n ___        \r\n \u2572          \r\n  \u2572    2    \r\n  \u2571   x  + 3\r\n \u2571          \r\n \u203E\u203E\u203E        \r\
+    \nx = 1\r\n```\r\nThis works well. So, I suppose that `x`, in the above case should be lower.\r\nCould you tell me, how I can correct it?\nThe issue might be with the way adjustments are calculated,\
+    \ and this definitely works for simpler expressions:\r\n```diff\r\ndiff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py\r\nindex 7a3de3352..07198bea4 100644\r\n--- a/sympy/printing/pretty/pretty.py\r\
+    \n+++ b/sympy/printing/pretty/pretty.py\r\n@@ -575,7 +575,7 @@ def adjust(s, wid=None, how='<^>'):\r\n                 for i in reversed(range(0, d)):\r\n                     lines.append('%s%s%s' %\
+    \ (' '*i, vsum[4], ' '*(w - i - 1)))\r\n                 lines.append(vsum[8]*(w))\r\n-                return d, h + 2*more, lines, more\r\n+                return d, h + 2*more, lines, more // 2\r\n\
+    \ \r\n         f = expr.function\r\n```\r\nas in\r\n```python\r\n>>> pprint(Sum(x ** n, (n, 1, oo)) + x)\r\n      \u221E     \r\n     ___    \r\n     \u2572      \r\n      \u2572    n\r\nx +   \u2571\
+    \   x \r\n     \u2571      \r\n     \u203E\u203E\u203E    \r\n    n = 1   \r\n\r\n>>> pprint(Sum(n, (n, 1, oo)) + x)\r\n      \u221E    \r\n     ___   \r\n     \u2572     \r\n      \u2572    \r\nx +\
+    \   \u2571   n\r\n     \u2571     \r\n     \u203E\u203E\u203E   \r\n    n = 1   \r\n```\r\n\r\nbut this leads to test failures for more complex expressions. However, many of the tests look like they\
+    \ expect the misaligned sum.\nThe ascii printer also has this issue:\r\n```\r\nIn [1]: pprint(x + Sum(x + Integral(x**2 + x + 1, (x, 0, n)), (n, 1, oo)), use_unicode=False)\r\n       oo            \
+    \                \r\n    ______                           \r\n    \\     `                          \r\n     \\      /      n                \\\r\n      \\     |      /                |\r\n       \\\
+    \    |     |                 |\r\nx +     \\   |     |  / 2        \\   |\r\n        /   |x +  |  \\x  + x + 1/ dx|\r\n       /    |     |                 |\r\n      /     |    /                  |\r\
+    \n     /      \\    0                  /\r\n    /_____,                          \r\n     n = 1                           \r\n\r\n```\n\nMake the minimal code changes needed to fix the issue. All existing\
+    \ tests must still pass after your fix."
+  repos:
+  - sympy__sympy
+  difficulty: swe-bench
+  validation_cmd: .venv/bin/python -m pytest -xvs -k 'test_pretty_sum'
+  metadata:
+    base_commit: a7e6f093c98a3c4783848a19fce646e32b6e0161
+    test_patch: "diff --git a/sympy/printing/pretty/tests/test_pretty.py b/sympy/printing/pretty/tests/test_pretty.py\n--- a/sympy/printing/pretty/tests/test_pretty.py\n+++ b/sympy/printing/pretty/tests/test_pretty.py\n\
+      @@ -4423,14 +4423,14 @@ def test_pretty_sum():\n   n             \\n\\\n ______          \\n\\\n \u2572               \\n\\\n- \u2572      \u221E       \\n\\\n-  \u2572     \u2320       \\n\\\n- \
+      \  \u2572    \u23AE   n   \\n\\\n-    \u2572   \u23AE  x  dx\\n\\\n-    \u2571   \u2321       \\n\\\n-   \u2571    -\u221E      \\n\\\n-  \u2571    k        \\n\\\n- \u2571              \\n\\\n+ \u2572\
+      \              \\n\\\n+  \u2572     \u221E       \\n\\\n+   \u2572    \u2320       \\n\\\n+    \u2572   \u23AE   n   \\n\\\n+    \u2571   \u23AE  x  dx\\n\\\n+   \u2571    \u2321       \\n\\\n+  \u2571\
+      \     -\u221E      \\n\\\n+ \u2571     k        \\n\\\n \u2571               \\n\\\n \u203E\u203E\u203E\u203E\u203E\u203E          \\n\\\n k = 0           \\\n@@ -4474,14 +4474,14 @@ def test_pretty_sum():\n\
+      \ -\u221E                \\n\\\n  ______           \\n\\\n  \u2572                \\n\\\n-  \u2572       \u221E       \\n\\\n-   \u2572      \u2320       \\n\\\n-    \u2572     \u23AE   n   \\n\\\n\
+      -     \u2572    \u23AE  x  dx\\n\\\n-     \u2571    \u2321       \\n\\\n-    \u2571     -\u221E      \\n\\\n-   \u2571     k        \\n\\\n-  \u2571               \\n\\\n+  \u2572               \\\
+      n\\\n+   \u2572      \u221E       \\n\\\n+    \u2572     \u2320       \\n\\\n+     \u2572    \u23AE   n   \\n\\\n+     \u2571    \u23AE  x  dx\\n\\\n+    \u2571     \u2321       \\n\\\n+   \u2571\
+      \      -\u221E      \\n\\\n+  \u2571      k        \\n\\\n  \u2571                \\n\\\n  \u203E\u203E\u203E\u203E\u203E\u203E           \\n\\\n  k = 0            \\\n@@ -4527,14 +4527,14 @@ def\
+      \ test_pretty_sum():\n           -\u221E                         \\n\\\n            ______                    \\n\\\n            \u2572                         \\n\\\n-            \u2572         \
+      \       \u221E       \\n\\\n-             \u2572               \u2320       \\n\\\n-              \u2572              \u23AE   n   \\n\\\n-               \u2572             \u23AE  x  dx\\n\\\n- \
+      \              \u2571             \u2321       \\n\\\n-              \u2571              -\u221E      \\n\\\n-             \u2571              k        \\n\\\n-            \u2571                 \
+      \       \\n\\\n+            \u2572                        \\n\\\n+             \u2572               \u221E       \\n\\\n+              \u2572              \u2320       \\n\\\n+               \u2572\
+      \             \u23AE   n   \\n\\\n+               \u2571             \u23AE  x  dx\\n\\\n+              \u2571              \u2321       \\n\\\n+             \u2571               -\u221E      \\n\\\
+      \n+            \u2571               k        \\n\\\n            \u2571                         \\n\\\n            \u203E\u203E\u203E\u203E\u203E\u203E                    \\n\\\n      2        2  \
+      \     1   x          \\n\\\n@@ -4572,14 +4572,14 @@ def test_pretty_sum():\n                   x   n          \\n\\\n          ______                  \\n\\\n          \u2572                     \
+      \  \\n\\\n-          \u2572              \u221E       \\n\\\n-           \u2572             \u2320       \\n\\\n-            \u2572            \u23AE   n   \\n\\\n-             \u2572           \u23AE\
+      \  x  dx\\n\\\n-             \u2571           \u2321       \\n\\\n-            \u2571            -\u221E      \\n\\\n-           \u2571            k        \\n\\\n-          \u2571               \
+      \       \\n\\\n+          \u2572                      \\n\\\n+           \u2572             \u221E       \\n\\\n+            \u2572            \u2320       \\n\\\n+             \u2572           \u23AE\
+      \   n   \\n\\\n+             \u2571           \u23AE  x  dx\\n\\\n+            \u2571            \u2321       \\n\\\n+           \u2571             -\u221E      \\n\\\n+          \u2571          \
+      \   k        \\n\\\n          \u2571                       \\n\\\n          \u203E\u203E\u203E\u203E\u203E\u203E                  \\n\\\n          k = 0                   \\\n@@ -4602,8 +4602,8 @@\
+      \ def test_pretty_sum():\n   \u221E    \\n\\\n  ___   \\n\\\n  \u2572     \\n\\\n-  \u2572   x\\n\\\n-  \u2571    \\n\\\n+  \u2572    \\n\\\n+  \u2571   x\\n\\\n  \u2571     \\n\\\n  \u203E\u203E\u203E\
+      \   \\n\\\n x = 0  \\\n@@ -4655,10 +4655,10 @@ def test_pretty_sum():\n   \u221E    \\n\\\n  ____  \\n\\\n  \u2572     \\n\\\n-  \u2572   x\\n\\\n-   \u2572  \u2500\\n\\\n-   \u2571  2\\n\\\n-  \u2571\
+      \    \\n\\\n+  \u2572    \\n\\\n+   \u2572  x\\n\\\n+   \u2571  \u2500\\n\\\n+  \u2571   2\\n\\\n  \u2571     \\n\\\n  \u203E\u203E\u203E\u203E  \\n\\\n x = 0  \\\n@@ -4716,12 +4716,12 @@ def test_pretty_sum():\n\
+      \   \u221E           \\n\\\n _____         \\n\\\n \u2572             \\n\\\n- \u2572           n\\n\\\n-  \u2572   \u239B    x\u239E \\n\\\n-   \u2572  \u239C    \u2500\u239F \\n\\\n-   \u2571  \u239C\
+      \ 3  2\u239F \\n\\\n-  \u2571   \u239Dx \u22C5y \u23A0 \\n\\\n- \u2571            \\n\\\n+ \u2572            \\n\\\n+  \u2572          n\\n\\\n+   \u2572  \u239B    x\u239E \\n\\\n+   \u2571  \u239C\
+      \    \u2500\u239F \\n\\\n+  \u2571   \u239C 3  2\u239F \\n\\\n+ \u2571    \u239Dx \u22C5y \u23A0 \\n\\\n \u2571             \\n\\\n \u203E\u203E\u203E\u203E\u203E         \\n\\\n x = 0         \\\n\
+      @@ -4844,14 +4844,14 @@ def test_pretty_sum():\n     \u221E          n                         \\n\\\n   ______   ______                        \\n\\\n   \u2572        \u2572                     \
+      \        \\n\\\n-   \u2572        \u2572     \u239B        1    \u239E        \\n\\\n-    \u2572        \u2572    \u239C1 + \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u239F        \\n\\\
+      \n-     \u2572        \u2572   \u239C          1  \u239F        \\n\\\n-      \u2572        \u2572  \u239C    1 + \u2500\u2500\u2500\u2500\u2500\u239F     1  \\n\\\n-      \u2571        \u2571  \u239C\
+      \            1\u239F + \u2500\u2500\u2500\u2500\u2500\\n\\\n-     \u2571        \u2571   \u239C        1 + \u2500\u239F       1\\n\\\n-    \u2571        \u2571    \u239D            k\u23A0   1 + \u2500\
+      \\n\\\n-   \u2571        \u2571                           k\\n\\\n+   \u2572        \u2572                            \\n\\\n+    \u2572        \u2572    \u239B        1    \u239E        \\n\\\n+\
+      \     \u2572        \u2572   \u239C1 + \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u239F        \\n\\\n+      \u2572        \u2572  \u239C          1  \u239F     1  \\n\\\n+      \u2571\
+      \        \u2571  \u239C    1 + \u2500\u2500\u2500\u2500\u2500\u239F + \u2500\u2500\u2500\u2500\u2500\\n\\\n+     \u2571        \u2571   \u239C            1\u239F       1\\n\\\n+    \u2571        \u2571\
+      \    \u239C        1 + \u2500\u239F   1 + \u2500\\n\\\n+   \u2571        \u2571     \u239D            k\u23A0       k\\n\\\n   \u2571        \u2571                             \\n\\\n   \u203E\u203E\
+      \u203E\u203E\u203E\u203E   \u203E\u203E\u203E\u203E\u203E\u203E                        \\n\\\n       1   k = 111                        \\n\\\n"
+    fail_to_pass: '["test_pretty_sum"]'
+    pass_to_pass: '["test_pretty_ascii_str", "test_pretty_unicode_str", "test_upretty_greek", "test_upretty_multiindex", "test_upretty_sub_super", "test_upretty_subs_missing_in_24", "test_missing_in_2X_issue_9047",
+      "test_upretty_modifiers", "test_pretty_Cycle", "test_pretty_basic", "test_negative_fractions", "test_issue_5524", "test_pretty_ordering", "test_EulerGamma", "test_GoldenRatio", "test_pretty_relational",
+      "test_Assignment", "test_AugmentedAssignment", "test_issue_7117", "test_pretty_rational", "test_pretty_functions", "test_pretty_sqrt", "test_pretty_sqrt_char_knob", "test_pretty_sqrt_longsymbol_no_sqrt_char",
+      "test_pretty_KroneckerDelta", "test_pretty_product", "test_pretty_lambda", "test_pretty_order", "test_pretty_derivatives", "test_pretty_integrals", "test_pretty_matrix", "test_pretty_ndim_arrays",
+      "test_tensor_TensorProduct", "test_diffgeom_print_WedgeProduct", "test_Adjoint", "test_pretty_Trace_issue_9044", "test_MatrixExpressions", "test_pretty_dotproduct", "test_pretty_piecewise", "test_pretty_ITE",
+      "test_pretty_seq", "test_any_object_in_sequence", "test_print_builtin_set", "test_pretty_sets", "test_pretty_SetExpr", "test_pretty_ImageSet", "test_pretty_ConditionSet", "test_pretty_ComplexRegion",
+      "test_pretty_Union_issue_10414", "test_pretty_Intersection_issue_10414", "test_ProductSet_paranthesis", "test_ProductSet_prod_char_issue_10413", "test_pretty_sequences", "test_pretty_FourierSeries",
+      "test_pretty_FormalPowerSeries", "test_pretty_limits", "test_pretty_ComplexRootOf", "test_pretty_RootSum", "test_GroebnerBasis", "test_pretty_Boolean", "test_pretty_Domain", "test_pretty_prec", "test_pprint",
+      "test_pretty_class", "test_pretty_no_wrap_line", "test_settings", "test_units", "test_pretty_Subs", "test_gammas", "test_beta", "test_function_subclass_different_name", "test_SingularityFunction",
+      "test_deltas", "test_hyper", "test_meijerg", "test_noncommutative", "test_pretty_special_functions", "test_pretty_geometry", "test_expint", "test_elliptic_functions", "test_RandomDomain", "test_PrettyPoly",
+      "test_issue_6285", "test_issue_6359", "test_issue_6739", "test_complicated_symbol_unchanged", "test_categories", "test_PrettyModules", "test_QuotientRing", "test_Homomorphism", "test_Tr", "test_pretty_Add",
+      "test_issue_7179", "test_issue_7180", "test_pretty_Complement", "test_pretty_SymmetricDifference", "test_pretty_Contains", "test_issue_4335", "test_issue_6324", "test_issue_7927", "test_issue_6134",
+      "test_issue_9877", "test_issue_13651", "test_pretty_primenu", "test_pretty_primeomega", "test_pretty_Mod", "test_issue_11801", "test_pretty_UnevaluatedExpr", "test_issue_10472", "test_MatrixElement_printing",
+      "test_issue_12675", "test_MatrixSymbol_printing", "test_degree_printing", "test_vector_expr_pretty_printing", "test_pretty_print_tensor_expr", "test_pretty_print_tensor_partial_deriv", "test_issue_15560",
+      "test_print_lerchphi", "test_issue_15583", "test_matrixSymbolBold", "test_center_accent"]'
+defaults:
+  timeout: 600s
+  max_cells: 10
+  max_consecutive_failures: 10

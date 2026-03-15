@@ -1,0 +1,318 @@
+Campaign: 8 repos × 10 tasks = 10 cells
+Bead: Demarch-pr33
+Output: campaigns/swebench-lite-pilot-20260314
+
+
+═══════════════════════════════════════════════════
+[1/10] django__django × django__django-11179
+═══════════════════════════════════════════════════
+Cloning https://github.com/django/django at 19fc6376ce67...
+  Cloned in 23s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=73s, files_changed=1, tokens=18/2571
+  Patch: 614 bytes
+Applying test_patch (986 bytes)...
+Validating: .venv/bin/python tests/runtests.py --settings=test_sqlite delete.tests.FastDeleteTests.test_fast_delete_instance_set_pk_none
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+    Traceback (most recent call last):
+      File "/tmp/intermix/django__django-django__django-11179-1773554091/tests/runtests.py", line 13, in <module>
+        import django
+      File "/tmp/intermix/django__django-django__django-11179-1773554091/django/__init__.py", line 1, in <module>
+        from django.utils.version import get_version
+      File "/tmp/intermix/django__django-django__django-11179-1773554091/django/utils/version.py", line 6, in <module>
+        from distutils.version import LooseVersion
+    ModuleNotFoundError: No module named 'distutils'
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[2/10] django__django × django__django-14999
+═══════════════════════════════════════════════════
+Cloning https://github.com/django/django at a754b82dac51...
+  Cloned in 21s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=205s, files_changed=1, tokens=21/4447
+  Patch: 792 bytes
+Applying test_patch (1674 bytes)...
+Validating: .venv/bin/python tests/runtests.py --settings=test_sqlite migrations.test_operations.OperationTests.test_rename_model_with_db_table_noop
+  Validation: passed=true, exit=0
+  Result: success (acceptable)
+
+═══════════════════════════════════════════════════
+[3/10] matplotlib__matplotlib × matplotlib__matplotlib-23913
+═══════════════════════════════════════════════════
+Cloning https://github.com/matplotlib/matplotlib at 5c4595267ccd...
+  Cloned in 48s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=242s, files_changed=1, tokens=28/4958
+  Patch: 1104 bytes
+Applying test_patch (650 bytes)...
+Validating: .venv/bin/pytest -xvs 'lib/matplotlib/tests/test_legend.py::test_legend_draggable[True]' 'lib/matplotlib/tests/test_legend.py::test_legend_draggable[False]'
+  Validation: passed=false, exit=127
+  Output (last 10 lines):
+    bash: line 1: .venv/bin/pytest: No such file or directory
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[4/10] pallets__flask × pallets__flask-4045
+═══════════════════════════════════════════════════
+Cloning https://github.com/pallets/flask at d8c37f43724c...
+  Cloned in 3s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=213s, files_changed=3, tokens=36/6343
+  Patch: 2549 bytes
+Applying test_patch (4143 bytes)...
+  WARNING: test_patch failed: git apply test patch: exit status 1: error: patch failed: tests/test_basic.py:1631
+error: tests/test_basic.py: patch does not apply
+error: patch failed: tests/test_blueprints.py:253
+error: tests/test_blueprints.py: patch does not apply
+
+Validating: .venv/bin/pytest -xvs 'tests/test_blueprints.py::test_dotted_name_not_allowed' 'tests/test_blueprints.py::test_route_decorator_custom_endpoint_with_dots'
+  Validation: passed=false, exit=127
+  Output (last 10 lines):
+    bash: line 1: .venv/bin/pytest: No such file or directory
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[5/10] psf__requests × psf__requests-2674
+═══════════════════════════════════════════════════
+Cloning https://github.com/psf/requests at 0be38a0c37c5...
+  Cloned in 3s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=79s, files_changed=1, tokens=16/3364
+  Patch: 1454 bytes
+Applying test_patch (672 bytes)...
+Validating: .venv/bin/pytest -xvs 'test_requests.py::RequestsTestCase::test_BASICAUTH_TUPLE_HTTP_200_OK_GET' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_ALTERNATIVE' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_WITH_PARAMS' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_HEAD' 'test_requests.py::RequestsTestCase::test_auth_is_retained_for_redirect_on_host' 'test_requests.py::RequestsTestCase::test_different_encodings_dont_break_post' 'test_requests.py::RequestsTestCase::test_manual_redirect_with_partial_body_read' 'test_requests.py::RequestsTestCase::test_mixed_case_scheme_acceptable' 'test_requests.py::RequestsTestCase::test_prepared_from_session' 'test_requests.py::RequestsTestCase::test_unicode_multipart_post' 'test_requests.py::TestTimeout::test_none_timeout' 'test_requests.py::TestTimeout::test_encoded_methods'
+  Validation: passed=false, exit=4
+  Output (last 10 lines):
+    requests/utils.py:12
+      /tmp/intermix/psf__requests-psf__requests-2674-1773555007/requests/utils.py:12: DeprecationWarning: 'cgi' is deprecated and slated for removal in Python 3.13
+        import cgi
+    
+    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+    =========================== short test summary info ============================
+    ERROR test_requests.py
+    !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ========================= 1 warning, 1 error in 0.24s ==========================
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[6/10] pytest-dev__pytest × pytest-dev__pytest-5221
+═══════════════════════════════════════════════════
+Cloning https://github.com/pytest-dev/pytest at 4a2fdce62b73...
+  Cloned in 6s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=171s, files_changed=1, tokens=27/5201
+  Patch: 804 bytes
+Applying test_patch (1182 bytes)...
+Validating: .venv/bin/pytest -xvs 'testing/python/fixtures.py::TestShowFixtures::test_show_fixtures' 'testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_verbose'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773555092/.venv/bin/pytest", line 4, in <module>
+        from pytest import main
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773555092/src/pytest.py", line 7, in <module>
+        from _pytest.assertion import register_assert_rewrite
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773555092/src/_pytest/assertion/__init__.py", line 12, in <module>
+        from _pytest.assertion import rewrite
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773555092/src/_pytest/assertion/rewrite.py", line 8, in <module>
+        import imp
+    ModuleNotFoundError: No module named 'imp'
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[7/10] scikit-learn__scikit-learn × scikit-learn__scikit-learn-13497
+═══════════════════════════════════════════════════
+Cloning https://github.com/scikit-learn/scikit-learn at 26f690961a52...
+  Cloned in 15s
+Running setup...
+  SETUP FAILED: setup command "uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install numpy scipy cython && VIRTUAL_ENV=$PWD/.venv uv pip install -e .": exit status 2: Using CPython 3.12.3 interpreter at: /usr/bin/python3
+Creating virtual environment at: .venv
+Activate with: source .venv/bin/activate
+Resolved 3 packages in 733ms
+Downloading cython (3.2MiB)
+ Downloaded cython
+Prepared 1 package in 104ms
+Installed 3 packages in 22ms
+ + cython==3.2.4
+ + numpy==2.4.3
+ + scipy==1.17.1
+error: The build backend returned an error
+  Caused by: Call to `setuptools.build_meta:__legacy__.build_editable` failed (exit status: 1)
+
+[stderr]
+Traceback (most recent call last):
+  File "<string>", line 14, in <module>
+  File "/home/mk/.cache/uv/builds-v0/.tmp8MNAjQ/lib/python3.12/site-packages/setuptools/build_meta.py", line 481, in get_requires_for_build_editable
+    return self.get_requires_for_build_wheel(config_settings)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mk/.cache/uv/builds-v0/.tmp8MNAjQ/lib/python3.12/site-packages/setuptools/build_meta.py", line 333, in get_requires_for_build_wheel
+    return self._get_build_requires(config_settings, requirements=[])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mk/.cache/uv/builds-v0/.tmp8MNAjQ/lib/python3.12/site-packages/setuptools/build_meta.py", line 301, in _get_build_requires
+    self.run_setup()
+  File "/home/mk/.cache/uv/builds-v0/.tmp8MNAjQ/lib/python3.12/site-packages/setuptools/build_meta.py", line 520, in run_setup
+    super().run_setup(setup_script=setup_script)
+  File "/home/mk/.cache/uv/builds-v0/.tmp8MNAjQ/lib/python3.12/site-packages/setuptools/build_meta.py", line 317, in run_setup
+    exec(code, locals())
+  File "<string>", line 12, in <module>
+ModuleNotFoundError: No module named 'pkg_resources'
+
+hint: This error likely indicates that `file` depends on `pkg_resources`, but doesn't declare it as a build dependency. If `file` is a first-party package, consider adding `pkg_resources` to its `build-system.requires`. Otherwise, either add it to your `pyproject.toml` under:
+
+[tool.uv.extra-build-dependencies]
+file = ["pkg_resources"]
+
+or `uv pip install pkg_resources` into the environment and re-run with `--no-build-isolation`.
+
+
+═══════════════════════════════════════════════════
+[8/10] sphinx-doc__sphinx × sphinx-doc__sphinx-7975
+═══════════════════════════════════════════════════
+Cloning https://github.com/sphinx-doc/sphinx at 4ec6cbe341fd...
+  Cloned in 10s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=207s, files_changed=1, tokens=19/3802
+  Patch: 922 bytes
+Applying test_patch (1170 bytes)...
+Validating: .venv/bin/pytest -xvs 'tests/test_environment_indexentries.py::test_create_single_index'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773555287/sphinx/testing/fixtures.py", line 21, in <module>
+        from sphinx.testing import util
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773555287/sphinx/testing/util.py", line 23, in <module>
+        from sphinx import application, locale
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773555287/sphinx/application.py", line 42, in <module>
+        from sphinx.registry import SphinxComponentRegistry
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773555287/sphinx/registry.py", line 22, in <module>
+        from pkg_resources import iter_entry_points
+    ImportError: Error importing plugin "sphinx.testing.fixtures": No module named 'pkg_resources'
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[9/10] sympy__sympy × sympy__sympy-15345
+═══════════════════════════════════════════════════
+Cloning https://github.com/sympy/sympy at 9ef28fba5b4d...
+  Cloned in 17s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=100s, files_changed=1, tokens=15/2916
+  Patch: 648 bytes
+Applying test_patch (785 bytes)...
+Validating: .venv/bin/python -m pytest -xvs -k 'test_Function'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+    /tmp/intermix/sympy__sympy-sympy__sympy-15345-1773555520/.venv/bin/python: No module named pytest
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[10/10] sympy__sympy × sympy__sympy-16503
+═══════════════════════════════════════════════════
+Cloning https://github.com/sympy/sympy at a7e6f093c98a...
+  Cloned in 18s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=516s, files_changed=2, tokens=79/22426
+  Patch: 6188 bytes
+Applying test_patch (5595 bytes)...
+  WARNING: test_patch failed: git apply test patch: exit status 1: error: patch failed: sympy/printing/pretty/tests/test_pretty.py:4423
+error: sympy/printing/pretty/tests/test_pretty.py: patch does not apply
+
+Validating: .venv/bin/python -m pytest -xvs -k 'test_pretty_sum'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+    /tmp/intermix/sympy__sympy-sympy__sympy-16503-1773555639/.venv/bin/python: No module named pytest
+    
+  Result: partial (degraded)
+
+
+# Evaluation Report
+
+## Summary
+
+- **Total cells:** 10
+- **Success:** 1
+- **Failures:** 9
+- **Pass rate:** 10.0%
+- **Billing tokens:** 56287 (259 in + 56028 out)
+- **Effective context:** 10780908 (10365608 cache_read + 415041 cache_create)
+
+## Heatmap
+
+```
+                            django__django-11179  django__django-14999  matplotlib__matplotlib-23913  pallets__flask-4045  psf__requests-2674  pytest-dev__pytest-5221  scikit-learn__scikit-learn-13497  sphinx-doc__sphinx-7975  sympy__sympy-15345  sympy__sympy-16503
+django__django              PART                  PASS                                                                                                                                                                                                                   
+matplotlib__matplotlib                                                  PART                                                                                                                                                                                             
+pallets__flask                                                                                        PART                                                                                                                                                               
+psf__requests                                                                                                              PART                                                                                                                                          
+pytest-dev__pytest                                                                                                                             PART                                                                                                                      
+scikit-learn__scikit-learn                                                                                                                                              SETU                                                                                             
+sphinx-doc__sphinx                                                                                                                                                                                        PART                                                           
+sympy__sympy                                                                                                                                                                                                                       PART                PART              
+
+PASS=success PART=partial TOUT=timeout FAIL=crash TOOL=tool_failure NOPG=no_progress CTXL=context_limit SETU=setup_failure SKIP=skipped
+```
+
+## Outcome Distribution
+
+- partial: 8
+- setup_failure: 1
+- success: 1
+
+## By Repository
+
+- **django__django**: 1/2 passed
+- **matplotlib__matplotlib**: 0/1 passed
+- **pallets__flask**: 0/1 passed
+- **psf__requests**: 0/1 passed
+- **pytest-dev__pytest**: 0/1 passed
+- **scikit-learn__scikit-learn**: 0/1 passed
+- **sphinx-doc__sphinx**: 0/1 passed
+- **sympy__sympy**: 0/2 passed
+
+## By Task
+
+- **django__django-11179**: 0/1 passed
+- **django__django-14999**: 1/1 passed
+- **matplotlib__matplotlib-23913**: 0/1 passed
+- **pallets__flask-4045**: 0/1 passed
+- **psf__requests-2674**: 0/1 passed
+- **pytest-dev__pytest-5221**: 0/1 passed
+- **scikit-learn__scikit-learn-13497**: 0/1 passed
+- **sphinx-doc__sphinx-7975**: 0/1 passed
+- **sympy__sympy-15345**: 0/1 passed
+- **sympy__sympy-16503**: 0/1 passed
+
+## Failure Clusters
+
+### partial (8 cells)
+
+- django__django:django__django-11179
+- matplotlib__matplotlib:matplotlib__matplotlib-23913
+- pallets__flask:pallets__flask-4045
+- psf__requests:psf__requests-2674
+- pytest-dev__pytest:pytest-dev__pytest-5221
+- sphinx-doc__sphinx:sphinx-doc__sphinx-7975
+- sympy__sympy:sympy__sympy-15345
+- sympy__sympy:sympy__sympy-16503
+
+### setup_failure (1 cells)
+
+- scikit-learn__scikit-learn:scikit-learn__scikit-learn-13497
+
+
+
+Report written to campaigns/swebench-lite-pilot-20260314/pilot-report.json

@@ -107,7 +107,7 @@ func RunSetup(dir, setupCmd string) error {
 	if setupCmd == "" {
 		return nil
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", setupCmd)
@@ -336,6 +336,35 @@ func InferTargetedValidationCmd(dir, language string) string {
 	default:
 		return ""
 	}
+}
+
+// ApplyTestPatch applies a SWE-bench test patch to the working directory.
+// The test patch adds or modifies tests that verify the fix. It is applied
+// after Skaffen makes its changes but before validation runs.
+// Returns nil if patchContent is empty (no test patch to apply).
+func ApplyTestPatch(dir, patchContent string) error {
+	if patchContent == "" {
+		return nil
+	}
+
+	// Write patch to temp file
+	patchFile := filepath.Join(dir, ".swebench-test.patch")
+	if err := os.WriteFile(patchFile, []byte(patchContent), 0644); err != nil {
+		return fmt.Errorf("write test patch: %w", err)
+	}
+	defer os.Remove(patchFile)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "git", "apply", "--allow-empty", patchFile)
+	cmd.Dir = dir
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("git apply test patch: %w: %s", err, stderr.String())
+	}
+	return nil
 }
 
 // ExtractPatch generates a unified diff of all changes in the working directory.
