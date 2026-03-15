@@ -149,7 +149,17 @@ func RunValidation(dir, validationCmd string) ValidationResult {
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "bash", "-c", validationCmd)
+	// If a .venv exists, activate it before running the validation command.
+	// Also propagate GOTOOLCHAIN for Go repos that need newer toolchains.
+	shellCmd := validationCmd
+	if _, err := os.Stat(filepath.Join(dir, ".venv", "bin", "activate")); err == nil {
+		shellCmd = "source .venv/bin/activate && " + validationCmd
+	}
+	if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+		shellCmd = "export GOTOOLCHAIN=go1.23.0+auto && " + shellCmd
+	}
+
+	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
 
 	var combined bytes.Buffer
