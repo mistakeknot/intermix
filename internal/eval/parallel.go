@@ -124,20 +124,22 @@ func RunBatch(ctx context.Context, cells []BatchCell, workDir string, defaultTim
 	return results
 }
 
-// PollBatch waits for all active sessions to complete, collecting results.
+// PollBatch waits for active sessions to complete, collecting results.
 // For each completed cell: builds RunDetails, runs validation, classifies
 // via ClassifyFromRunDetails, writes per-cell JSONL via WriteCellResult +
 // CellJSONLPath, writes run details to CellRunFilePath.
+//
+// Respects ctx cancellation — if the context is cancelled (e.g., MCP timeout),
+// goroutines that haven't finished are abandoned. Per-cell files are written
+// as each cell completes, so partial results survive cancellation.
 func PollBatch(ctx context.Context, results []BatchResult, workDir string, timeout time.Duration) {
-	var wg sync.WaitGroup
+	done := make(chan struct{})
 
 	for i := range results {
 		if results[i].Error != nil || results[i].SessionName == "" {
-			continue // Already failed during spawn
+			continue
 		}
-		wg.Add(1)
 		go func(idx int) {
-			defer wg.Done()
 
 			r := &results[idx]
 			stdout, exitCode, durationMs, err := WaitTmuxSession(ctx, r.SessionName, timeout)
@@ -192,10 +194,33 @@ func PollBatch(ctx context.Context, results []BatchResult, workDir string, timeo
 			// Write run details for debugging
 			runFile := CellRunFilePath(workDir, r.Cell.ID())
 			writeRunDetailsToPath(runFile, rd)
+
+			// Signal completion (non-blocking)
+			select {
+			case done <- struct{}{}:
+			default:
+			}
 		}(i)
 	}
 
-	wg.Wait()
+	// Count how many cells we're waiting for
+	pending := 0
+	for _, r := range results {
+		if r.Error == nil && r.SessionName != "" {
+			pending++
+		}
+	}
+
+	// Wait for all cells or context cancellation
+	completed := 0
+	for completed < pending {
+		select {
+		case <-done:
+			completed++
+		case <-ctx.Done():
+			return // Context cancelled — partial results already written to disk
+		}
+	}
 }
 
 // writeRunDetailsToPath writes RunDetails to a specific JSON file path

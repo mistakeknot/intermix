@@ -513,8 +513,22 @@ func handlePollBatch(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToo
 		beadID = batchState.BeadID
 	}
 
-	// Poll all sessions
-	PollBatch(ctx, batchState.Results, dir, timeout)
+	// Poll all sessions — returns early if ctx is cancelled.
+	// Per-cell results are written to disk as each cell completes.
+	pollCtx, pollCancel := context.WithTimeout(ctx, timeout)
+	defer pollCancel()
+	PollBatch(pollCtx, batchState.Results, dir, timeout)
+
+	// Count completed vs pending
+	completedCount := 0
+	pendingCount := 0
+	for _, r := range batchState.Results {
+		if r.CellResult != nil {
+			completedCount++
+		} else if r.Error == nil && r.SessionName != "" {
+			pendingCount++
+		}
+	}
 
 	// Process results: harvest evidence and create debug beads for failures
 	debugBeadMap := make(map[string]string) // cellKey -> beadID
@@ -587,6 +601,11 @@ func handlePollBatch(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToo
 		for _, entry := range debugBeadList {
 			sb.WriteString(fmt.Sprintf("- %s\n", entry))
 		}
+	}
+
+	if pendingCount > 0 {
+		sb.WriteString(fmt.Sprintf("\n**Note:** %d cell(s) did not complete within the timeout. "+
+			"Results above reflect only the %d completed cell(s).\n", pendingCount, completedCount))
 	}
 
 	return mcp.NewToolResultText(sb.String()), nil
