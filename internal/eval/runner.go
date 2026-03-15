@@ -153,6 +153,12 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 		}
 	}
 
+	// Append auto-install of pytest + setuptools after the main setup.
+	// - pytest: needed by most SWE-bench validation commands
+	// - setuptools: provides pkg_resources (required by sphinx, older repos)
+	// Uses the venv's pip if available, falls back to uv pip.
+	shellCmd += " && (.venv/bin/pip install pytest setuptools 2>/dev/null || VIRTUAL_ENV=$PWD/.venv uv pip install pytest setuptools 2>/dev/null || true)"
+
 	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
 	if len(extraEnv) > 0 {

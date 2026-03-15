@@ -107,7 +107,7 @@ func SWEBenchToManifest(instances []SWEBenchInstance) *Manifest {
 		Repos: repos,
 		Tasks: tasks,
 		Defaults: Defaults{
-			Timeout:               "600s",
+			Timeout:               "900s",
 			MaxCells:              len(instances),
 			MaxConsecutiveFailures: len(instances), // don't circuit-break on bench runs
 		},

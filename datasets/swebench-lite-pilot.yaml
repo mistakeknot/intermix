@@ -574,6 +574,6 @@ tasks:
     repo: sympy/sympy
     version: '1.5'
 defaults:
-  timeout: 600s
+  timeout: 900s
   max_cells: 10
   max_consecutive_failures: 10
