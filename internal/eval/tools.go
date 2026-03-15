@@ -32,10 +32,11 @@ var initMatrixTool = mcp.NewTool("init_matrix",
 )
 
 var runCellTool = mcp.NewTool("run_cell",
-	mcp.WithDescription("Execute a single (repo, task) cell: clone repo, run setup, spawn Skaffen, run validation. Returns structured result."),
+	mcp.WithDescription("Execute a single (repo, task) cell: clone repo, run setup, spawn Skaffen, run validation. Returns structured result. Use docker=true for SWE-bench instances that need a specific Python version."),
 	mcp.WithString("repo", mcp.Required(), mcp.Description("Repo ID from the manifest")),
 	mcp.WithString("task", mcp.Required(), mcp.Description("Task ID from the manifest")),
 	mcp.WithString("working_directory", mcp.Description("Directory containing intermix.jsonl (default: cwd)")),
+	mcp.WithBoolean("docker", mcp.Description("Run in Docker container with version-specific Python (requires ANTHROPIC_API_KEY)")),
 )
 
 var classifyResultTool = mcp.NewTool("classify_result",
@@ -171,6 +172,41 @@ func handleRunCell(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolR
 	}
 	if repo == nil || task == nil {
 		return mcp.NewToolResultText(fmt.Sprintf("repo %q or task %q not found in manifest", repoID, taskID)), nil
+	}
+
+	// Docker mode: run entire pipeline inside a container
+	useDockerVal := req.GetArguments()["docker"]
+	useDocker, _ := useDockerVal.(bool)
+	if useDocker {
+		repoName := task.Metadata["repo"]
+		version := task.Metadata["version"]
+		if repoName == "" {
+			repoName = strings.ReplaceAll(repo.ID, "__", "/")
+		}
+		pyVer := LookupPythonVersion(repoName, version)
+		image := DockerImageTag(pyVer)
+
+		if !DockerImageExists(image) {
+			return mcp.NewToolResultText(fmt.Sprintf("Docker image %s not found.\nBuild with: ./docker/build-images.sh %s", image, pyVer)), nil
+		}
+
+		timeout, _ := time.ParseDuration(state.Config.Timeout)
+		if timeout == 0 {
+			timeout = 10 * time.Minute
+		}
+
+		rd := RunCellDocker(ctx, repo, task, DockerConfig{Image: image, PythonVer: pyVer}, timeout)
+		writeRunDetails(dir, rd)
+
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("Docker cell: %s × %s (Python %s)\n", repoID, taskID, pyVer))
+		sb.WriteString(fmt.Sprintf("Result: exit=%d, duration=%dms, files_changed=%d, validation=%v\n",
+			rd.ExitCode, rd.DurationMs, rd.FilesChanged, rd.ValidationPassed))
+		if rd.Stderr != "" {
+			sb.WriteString(fmt.Sprintf("\nStderr:\n%s\n", rd.Stderr))
+		}
+		sb.WriteString("\nNext: call classify_result to record the outcome.")
+		return mcp.NewToolResultText(sb.String()), nil
 	}
 
 	cellID := fmt.Sprintf("%s-%s-%d", repoID, taskID, time.Now().Unix())

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -18,6 +19,7 @@ func main() {
 	instanceIDs := flag.String("instances", "", "Comma-separated instance IDs to filter (only with -dataset)")
 	outDir := flag.String("out", ".", "Output directory for results")
 	beadID := flag.String("bead", "", "Parent bead ID")
+	useDocker := flag.Bool("docker", false, "Run cells in Docker containers with version-specific Python")
 	flag.Parse()
 
 	if *manifestPath == "" && *datasetPath == "" {
@@ -95,6 +97,75 @@ func main() {
 		fmt.Printf("\n═══════════════════════════════════════════════════\n")
 		fmt.Printf("[%d/%d] %s × %s\n", i+1, len(cells), cell.RepoID, cell.TaskID)
 		fmt.Printf("═══════════════════════════════════════════════════\n")
+
+		// Docker mode: run entire pipeline inside a container
+		if *useDocker {
+			// Determine Python version from task metadata
+			version := task.Metadata["version"]
+			repoName := task.Metadata["repo"]
+			if repoName == "" {
+				// Infer repo name from repo ID (django__django → django/django)
+				repoName = strings.ReplaceAll(repo.ID, "__", "/")
+			}
+			if version == "" {
+				version = task.Metadata["version"]
+			}
+			pyVer := eval.LookupPythonVersion(repoName, version)
+			image := eval.DockerImageTag(pyVer)
+
+			fmt.Printf("Docker: %s (Python %s)\n", image, pyVer)
+
+			if !eval.DockerImageExists(image) {
+				fmt.Printf("  IMAGE NOT FOUND — skipping (build with: ./docker/build-images.sh %s)\n", pyVer)
+				cr := eval.ClassifyFromRunDetails(&eval.RunDetails{
+					Repo: cell.RepoID, Task: cell.TaskID,
+					ExitCode: -1, Stderr: fmt.Sprintf("Docker image %s not found", image),
+				}, cell.RepoID, cell.TaskID)
+				cr.Outcome = eval.OutcomeSetupFailure
+				cr.Severity = eval.SeverityCritical
+				results = append(results, cr)
+				eval.WriteCellResult(jsonlPath, cr)
+				continue
+			}
+
+			cellTimeout := 10 * time.Minute
+			if manifest.Defaults.Timeout != "" {
+				if parsed, err := time.ParseDuration(manifest.Defaults.Timeout); err == nil {
+					cellTimeout = parsed
+				}
+			}
+
+			dockerCfg := eval.DockerConfig{
+				Image:     image,
+				PythonVer: pyVer,
+			}
+			rd := eval.RunCellDocker(context.Background(), repo, task, dockerCfg, cellTimeout)
+			fmt.Printf("  Result: exit=%d, duration=%ds, files_changed=%d, validation=%v\n",
+				rd.ExitCode, rd.DurationMs/1000, rd.FilesChanged, rd.ValidationPassed)
+			if rd.Stderr != "" && rd.ExitCode != 0 {
+				// Show last 5 lines of stderr for debugging
+				lines := strings.Split(rd.Stderr, "\n")
+				start := len(lines) - 5
+				if start < 0 {
+					start = 0
+				}
+				for _, l := range lines[start:] {
+					if l != "" {
+						fmt.Printf("  stderr: %s\n", l)
+					}
+				}
+			}
+
+			cr := eval.ClassifyFromRunDetails(rd, cell.RepoID, cell.TaskID)
+			cr.LLMAnalysis = fmt.Sprintf("Docker pilot (py%s): exit=%d, files=%d, validation=%v", pyVer, rd.ExitCode, rd.FilesChanged, rd.ValidationPassed)
+			results = append(results, cr)
+			eval.WriteCellResult(jsonlPath, cr)
+			eval.EmitCellEvent(cr, *beadID)
+			fmt.Printf("  Outcome: %s (%s)\n", cr.Outcome, cr.Severity)
+
+			// Clean up
+			continue
+		}
 
 		cellID := fmt.Sprintf("%s-%s-%d", cell.RepoID, cell.TaskID, time.Now().Unix())
 		cloneDir := filepath.Join(os.TempDir(), "intermix", cellID)

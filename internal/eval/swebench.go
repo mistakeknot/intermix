@@ -93,10 +93,12 @@ func SWEBenchToManifest(instances []SWEBenchInstance) *Manifest {
 			Difficulty: "swe-bench",
 			ValidationCmd: buildSWEBenchValidationCmd(inst),
 			Metadata: map[string]string{
-				"base_commit": inst.BaseCommit,
-				"test_patch":  inst.TestPatch,
+				"base_commit":  inst.BaseCommit,
+				"test_patch":   inst.TestPatch,
 				"fail_to_pass": inst.FailToPass,
 				"pass_to_pass": inst.PassToPass,
+				"repo":         inst.Repo,
+				"version":      inst.Version,
 			},
 		})
 	}
