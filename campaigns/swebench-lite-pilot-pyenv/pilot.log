@@ -1,0 +1,274 @@
+Campaign: 8 repos × 10 tasks = 10 cells
+Bead: Demarch-707
+Output: campaigns/swebench-lite-pilot-pyenv
+
+
+═══════════════════════════════════════════════════
+[1/10] django__django × django__django-11179
+═══════════════════════════════════════════════════
+pyenv: Python 3.6 (via pyenv)
+Cloning https://github.com/django/django at 19fc6376ce67...
+  Cloned in 23s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=63s, files_changed=3, tokens=13/2081
+  Patch: 5995802 bytes
+Applying test_patch (986 bytes)...
+Validating: .venv/bin/python tests/runtests.py --settings=test_sqlite delete.tests.FastDeleteTests.test_fast_delete_instance_set_pk_none
+  Validation: passed=true, exit=0
+  Result: success (acceptable)
+
+═══════════════════════════════════════════════════
+[2/10] django__django × django__django-14999
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/django/django at a754b82dac51...
+  Cloned in 33s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=105s, files_changed=2, tokens=16/3522
+  Patch: 1253 bytes
+Applying test_patch (1674 bytes)...
+Validating: .venv/bin/python tests/runtests.py --settings=test_sqlite migrations.test_operations.OperationTests.test_rename_model_with_db_table_noop
+  Validation: passed=true, exit=0
+  Result: success (acceptable)
+
+═══════════════════════════════════════════════════
+[3/10] matplotlib__matplotlib × matplotlib__matplotlib-23913
+═══════════════════════════════════════════════════
+pyenv: Python 3.11 (via pyenv)
+Cloning https://github.com/matplotlib/matplotlib at 5c4595267ccd...
+  Cloned in 29s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=221s, files_changed=2, tokens=28/5365
+  Patch: 1725 bytes
+Applying test_patch (650 bytes)...
+Validating: .venv/bin/pytest -xvs 'lib/matplotlib/tests/test_legend.py::test_legend_draggable[True]' 'lib/matplotlib/tests/test_legend.py::test_legend_draggable[False]'
+  Validation: passed=false, exit=127
+  Output (last 10 lines):
+    bash: line 1: .venv/bin/pytest: No such file or directory
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[4/10] pallets__flask × pallets__flask-4045
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/pallets/flask at d8c37f43724c...
+  Cloned in 3s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=111s, files_changed=3, tokens=24/3745
+  Patch: 2065 bytes
+Applying test_patch (4143 bytes)...
+  WARNING: test_patch failed: git apply test patch: exit status 1: error: patch failed: tests/test_blueprints.py:253
+error: tests/test_blueprints.py: patch does not apply
+
+Validating: .venv/bin/pytest -xvs 'tests/test_blueprints.py::test_dotted_name_not_allowed' 'tests/test_blueprints.py::test_route_decorator_custom_endpoint_with_dots'
+  Validation: passed=false, exit=127
+  Output (last 10 lines):
+    bash: line 1: .venv/bin/pytest: No such file or directory
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[5/10] psf__requests × psf__requests-2674
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/psf/requests at 0be38a0c37c5...
+  Cloned in 3s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=231s, files_changed=3, tokens=24/4654
+  Patch: 3064 bytes
+Applying test_patch (672 bytes)...
+Validating: .venv/bin/pytest -xvs 'test_requests.py::RequestsTestCase::test_BASICAUTH_TUPLE_HTTP_200_OK_GET' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_ALTERNATIVE' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_GET_WITH_PARAMS' 'test_requests.py::RequestsTestCase::test_HTTP_200_OK_HEAD' 'test_requests.py::RequestsTestCase::test_auth_is_retained_for_redirect_on_host' 'test_requests.py::RequestsTestCase::test_different_encodings_dont_break_post' 'test_requests.py::RequestsTestCase::test_manual_redirect_with_partial_body_read' 'test_requests.py::RequestsTestCase::test_mixed_case_scheme_acceptable' 'test_requests.py::RequestsTestCase::test_prepared_from_session' 'test_requests.py::RequestsTestCase::test_unicode_multipart_post' 'test_requests.py::TestTimeout::test_none_timeout' 'test_requests.py::TestTimeout::test_encoded_methods'
+  Validation: passed=true, exit=0
+  Result: success (acceptable)
+
+═══════════════════════════════════════════════════
+[6/10] pytest-dev__pytest × pytest-dev__pytest-5221
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/pytest-dev/pytest at 4a2fdce62b73...
+  Cloned in 6s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=183s, files_changed=2, tokens=22/3233
+  Patch: 948 bytes
+Applying test_patch (1182 bytes)...
+Validating: .venv/bin/pytest -xvs 'testing/python/fixtures.py::TestShowFixtures::test_show_fixtures' 'testing/python/fixtures.py::TestShowFixtures::test_show_fixtures_verbose'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773599220/src/_pytest/config/__init__.py", line 684, in pytest_cmdline_parse
+        self.parse(args)
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773599220/src/_pytest/config/__init__.py", line 901, in parse
+        self._preparse(args, addopts=addopts)
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773599220/src/_pytest/config/__init__.py", line 840, in _preparse
+        self._checkversion()
+      File "/tmp/intermix/pytest-dev__pytest-pytest-dev__pytest-5221-1773599220/src/_pytest/config/__init__.py", line 877, in _checkversion
+        from pkg_resources import parse_version
+    ModuleNotFoundError: No module named 'pkg_resources'
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[7/10] scikit-learn__scikit-learn × scikit-learn__scikit-learn-13497
+═══════════════════════════════════════════════════
+pyenv: Python 3.6 (via pyenv)
+Cloning https://github.com/scikit-learn/scikit-learn at 26f690961a52...
+  Cloned in 15s
+Running setup...
+  SETUP FAILED: setup command "uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install numpy scipy cython && VIRTUAL_ENV=$PWD/.venv uv pip install -e .": exit status 1: You are using pip version 18.1, however version 21.3.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+Command "/tmp/intermix/scikit-learn__scikit-learn-scikit-learn__scikit-learn-13497-1773599412/.venv/bin/python3 -c "import setuptools, tokenize;__file__='/tmp/intermix/scikit-learn__scikit-learn-scikit-learn__scikit-learn-13497-1773599412/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" develop --no-deps" failed with error code 1 in /tmp/intermix/scikit-learn__scikit-learn-scikit-learn__scikit-learn-13497-1773599412/
+You are using pip version 18.1, however version 21.3.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+
+
+═══════════════════════════════════════════════════
+[8/10] sphinx-doc__sphinx × sphinx-doc__sphinx-7975
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/sphinx-doc/sphinx at 4ec6cbe341fd...
+  Cloned in 10s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=150s, files_changed=2, tokens=10/2075
+  Patch: 1506 bytes
+Applying test_patch (1170 bytes)...
+Validating: .venv/bin/pytest -xvs 'tests/test_environment_indexentries.py::test_create_single_index'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773599522/sphinx/testing/fixtures.py", line 21, in <module>
+        from sphinx.testing import util
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773599522/sphinx/testing/util.py", line 23, in <module>
+        from sphinx import application, locale
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773599522/sphinx/application.py", line 42, in <module>
+        from sphinx.registry import SphinxComponentRegistry
+      File "/tmp/intermix/sphinx-doc__sphinx-sphinx-doc__sphinx-7975-1773599522/sphinx/registry.py", line 22, in <module>
+        from pkg_resources import iter_entry_points
+    ImportError: Error importing plugin "sphinx.testing.fixtures": No module named 'pkg_resources'
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[9/10] sympy__sympy × sympy__sympy-15345
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/sympy/sympy at 9ef28fba5b4d...
+  Cloned in 19s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=0, duration=56s, files_changed=2, tokens=10/1895
+  Patch: 1131 bytes
+Applying test_patch (785 bytes)...
+Validating: .venv/bin/python -m pytest -xvs -k 'test_Function'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+    /tmp/intermix/sympy__sympy-sympy__sympy-15345-1773599686/.venv/bin/python: No module named pytest
+    
+  Result: partial (degraded)
+
+═══════════════════════════════════════════════════
+[10/10] sympy__sympy × sympy__sympy-16503
+═══════════════════════════════════════════════════
+pyenv: Python 3.9 (via pyenv)
+Cloning https://github.com/sympy/sympy at a7e6f093c98a...
+  Cloned in 26s
+Running setup...
+Spawning Skaffen (timeout: 600s)...
+  Skaffen: exit=-1, duration=600s, files_changed=3, tokens=0/0
+  Patch: 2780 bytes
+Applying test_patch (5595 bytes)...
+  WARNING: test_patch failed: git apply test patch: exit status 1: error: patch failed: sympy/printing/pretty/tests/test_pretty.py:4844
+error: sympy/printing/pretty/tests/test_pretty.py: patch does not apply
+
+Validating: .venv/bin/python -m pytest -xvs -k 'test_pretty_sum'
+  Validation: passed=false, exit=1
+  Output (last 10 lines):
+    /tmp/intermix/sympy__sympy-sympy__sympy-16503-1773599763/.venv/bin/python: No module named pytest
+    
+  Result: timeout (critical)
+
+
+# Evaluation Report
+
+## Summary
+
+- **Total cells:** 10
+- **Success:** 3
+- **Failures:** 7
+- **Pass rate:** 30.0%
+- **Billing tokens:** 26717 (147 in + 26570 out)
+- **Effective context:** 4925171 (4622475 cache_read + 302549 cache_create)
+
+## Heatmap
+
+```
+                            django__django-11179  django__django-14999  matplotlib__matplotlib-23913  pallets__flask-4045  psf__requests-2674  pytest-dev__pytest-5221  scikit-learn__scikit-learn-13497  sphinx-doc__sphinx-7975  sympy__sympy-15345  sympy__sympy-16503
+django__django              PASS                  PASS                                                                                                                                                                                                                   
+matplotlib__matplotlib                                                  PART                                                                                                                                                                                             
+pallets__flask                                                                                        PART                                                                                                                                                               
+psf__requests                                                                                                              PASS                                                                                                                                          
+pytest-dev__pytest                                                                                                                             PART                                                                                                                      
+scikit-learn__scikit-learn                                                                                                                                              SETU                                                                                             
+sphinx-doc__sphinx                                                                                                                                                                                        PART                                                           
+sympy__sympy                                                                                                                                                                                                                       PART                TOUT              
+
+PASS=success PART=partial TOUT=timeout FAIL=crash TOOL=tool_failure NOPG=no_progress CTXL=context_limit SETU=setup_failure SKIP=skipped
+```
+
+## Outcome Distribution
+
+- partial: 5
+- setup_failure: 1
+- success: 3
+- timeout: 1
+
+## By Repository
+
+- **django__django**: 2/2 passed
+- **matplotlib__matplotlib**: 0/1 passed
+- **pallets__flask**: 0/1 passed
+- **psf__requests**: 1/1 passed
+- **pytest-dev__pytest**: 0/1 passed
+- **scikit-learn__scikit-learn**: 0/1 passed
+- **sphinx-doc__sphinx**: 0/1 passed
+- **sympy__sympy**: 0/2 passed
+
+## By Task
+
+- **django__django-11179**: 1/1 passed
+- **django__django-14999**: 1/1 passed
+- **matplotlib__matplotlib-23913**: 0/1 passed
+- **pallets__flask-4045**: 0/1 passed
+- **psf__requests-2674**: 1/1 passed
+- **pytest-dev__pytest-5221**: 0/1 passed
+- **scikit-learn__scikit-learn-13497**: 0/1 passed
+- **sphinx-doc__sphinx-7975**: 0/1 passed
+- **sympy__sympy-15345**: 0/1 passed
+- **sympy__sympy-16503**: 0/1 passed
+
+## Failure Clusters
+
+### partial (5 cells)
+
+- matplotlib__matplotlib:matplotlib__matplotlib-23913
+- pallets__flask:pallets__flask-4045
+- pytest-dev__pytest:pytest-dev__pytest-5221
+- sphinx-doc__sphinx:sphinx-doc__sphinx-7975
+- sympy__sympy:sympy__sympy-15345
+
+### setup_failure (1 cells)
+
+- scikit-learn__scikit-learn:scikit-learn__scikit-learn-13497
+
+### timeout (1 cells)
+
+- sympy__sympy:sympy__sympy-16503
+
+
+
+Report written to campaigns/swebench-lite-pilot-pyenv/pilot-report.json

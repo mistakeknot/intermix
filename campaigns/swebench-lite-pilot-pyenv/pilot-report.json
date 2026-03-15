@@ -1,0 +1,323 @@
+{
+  "TotalCells": 10,
+  "SuccessCount": 3,
+  "FailureCount": 7,
+  "PassRate": 30,
+  "ByRepo": {
+    "django__django": {
+      "Total": 2,
+      "Success": 2,
+      "Failure": 0
+    },
+    "matplotlib__matplotlib": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pallets__flask": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "pytest-dev__pytest": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "scikit-learn__scikit-learn": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sphinx-doc__sphinx": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy": {
+      "Total": 2,
+      "Success": 0,
+      "Failure": 2
+    }
+  },
+  "ByTask": {
+    "django__django-11179": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "django__django-14999": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "matplotlib__matplotlib-23913": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pallets__flask-4045": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests-2674": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "pytest-dev__pytest-5221": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "scikit-learn__scikit-learn-13497": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sphinx-doc__sphinx-7975": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-15345": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-16503": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    }
+  },
+  "ByOutcome": {
+    "partial": 5,
+    "setup_failure": 1,
+    "success": 3,
+    "timeout": 1
+  },
+  "FailureClusters": [
+    {
+      "Outcome": "partial",
+      "Count": 5,
+      "Cells": [
+        "matplotlib__matplotlib:matplotlib__matplotlib-23913",
+        "pallets__flask:pallets__flask-4045",
+        "pytest-dev__pytest:pytest-dev__pytest-5221",
+        "sphinx-doc__sphinx:sphinx-doc__sphinx-7975",
+        "sympy__sympy:sympy__sympy-15345"
+      ],
+      "BeadID": ""
+    },
+    {
+      "Outcome": "setup_failure",
+      "Count": 1,
+      "Cells": [
+        "scikit-learn__scikit-learn:scikit-learn__scikit-learn-13497"
+      ],
+      "BeadID": ""
+    },
+    {
+      "Outcome": "timeout",
+      "Count": 1,
+      "Cells": [
+        "sympy__sympy:sympy__sympy-16503"
+      ],
+      "BeadID": ""
+    }
+  ],
+  "Delta": null,
+  "Results": [
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-11179",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 63839,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 2094,
+      "input_tokens": 13,
+      "output_tokens": 2081,
+      "cache_creation_tokens": 38505,
+      "cache_read_tokens": 356497,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-15T18:12:58Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14999",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 105321,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 3538,
+      "input_tokens": 16,
+      "output_tokens": 3522,
+      "cache_creation_tokens": 36352,
+      "cache_read_tokens": 429203,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=true",
+      "timestamp": "2026-03-15T18:15:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "matplotlib__matplotlib",
+      "task": "matplotlib__matplotlib-23913",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 221080,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 5393,
+      "input_tokens": 28,
+      "output_tokens": 5365,
+      "cache_creation_tokens": 43431,
+      "cache_read_tokens": 936025,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T18:21:00Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pallets__flask",
+      "task": "pallets__flask-4045",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 111764,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 3769,
+      "input_tokens": 24,
+      "output_tokens": 3745,
+      "cache_creation_tokens": 25857,
+      "cache_read_tokens": 720795,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T18:22:57Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "psf__requests",
+      "task": "psf__requests-2674",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 231355,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 4678,
+      "input_tokens": 24,
+      "output_tokens": 4654,
+      "cache_creation_tokens": 54993,
+      "cache_read_tokens": 1060734,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-15T18:27:00Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pytest-dev__pytest",
+      "task": "pytest-dev__pytest-5221",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 183258,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 3255,
+      "input_tokens": 22,
+      "output_tokens": 3233,
+      "cache_creation_tokens": 36328,
+      "cache_read_tokens": 626338,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T18:30:12Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "scikit-learn__scikit-learn",
+      "task": "scikit-learn__scikit-learn-13497",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "tool or MCP call failed",
+      "timestamp": "2026-03-15T18:32:02Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sphinx-doc__sphinx",
+      "task": "sphinx-doc__sphinx-7975",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 150274,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 2085,
+      "input_tokens": 10,
+      "output_tokens": 2075,
+      "cache_creation_tokens": 46466,
+      "cache_read_tokens": 253301,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T18:34:46Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-15345",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 56238,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 1905,
+      "input_tokens": 10,
+      "output_tokens": 1895,
+      "cache_creation_tokens": 20617,
+      "cache_read_tokens": 239582,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-15T18:36:03Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-16503",
+      "outcome": "timeout",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 600043,
+      "exit_code": -1,
+      "files_changed": 3,
+      "llm_analysis": "Pilot run: exit=-1, files=3, validation=false",
+      "failure_reason": "process timed out or was killed",
+      "timestamp": "2026-03-15T18:46:30Z"
+    }
+  ],
+  "Tokens": {
+    "total_input": 147,
+    "total_output": 26570,
+    "total_cache_creation": 302549,
+    "total_cache_read": 4622475,
+    "billing_tokens": 26717,
+    "effective_context": 4925171
+  }
+}

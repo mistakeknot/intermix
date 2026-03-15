@@ -116,10 +116,47 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "bash", "-c", setupCmd)
+	// If pyenv env vars are set, rewrite the setup command to use the correct
+	// Python binary for venv creation and pip installation.
+	// uv ignores PATH for Python discovery and doesn't support Python < 3.8,
+	// so we must handle both cases.
+	shellCmd := setupCmd
+	if len(extraEnv) > 0 {
+		pyBin := pyenvPythonFromEnv(extraEnv)
+		if pyBin != "" {
+			// Determine if uv supports this Python version (3.8+)
+			var pyVersion string
+			for _, e := range extraEnv {
+				if strings.HasPrefix(e, "PYENV_VERSION=") {
+					pyVersion = strings.TrimPrefix(e, "PYENV_VERSION=")
+				}
+			}
+			uvSupported := !strings.HasPrefix(pyVersion, "3.6") && !strings.HasPrefix(pyVersion, "3.7")
+
+			if strings.Contains(shellCmd, "uv venv .venv") {
+				if uvSupported {
+					shellCmd = strings.Replace(shellCmd, "uv venv .venv",
+						fmt.Sprintf("uv venv .venv --python %s", pyBin), 1)
+				} else {
+					// Python < 3.8: uv doesn't work at all, use native venv + pip
+					shellCmd = strings.Replace(shellCmd, "uv venv .venv",
+						fmt.Sprintf("%s -m venv .venv", pyBin), 1)
+				}
+			}
+
+			// For Python < 3.8, replace all "VIRTUAL_ENV=... uv pip install" with .venv/bin/pip
+			if !uvSupported {
+				shellCmd = strings.ReplaceAll(shellCmd,
+					"VIRTUAL_ENV=$PWD/.venv uv pip install",
+					".venv/bin/pip install")
+			}
+		}
+	}
+
+	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
 	if len(extraEnv) > 0 {
-		cmd.Env = append(extraEnv, os.Environ()...)
+		cmd.Env = append(os.Environ(), extraEnv...)
 	}
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -201,7 +238,7 @@ func RunValidationWithEnv(dir, validationCmd string, extraEnv []string) Validati
 	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
 	if len(extraEnv) > 0 {
-		cmd.Env = append(extraEnv, os.Environ()...)
+		cmd.Env = append(os.Environ(), extraEnv...)
 	}
 
 	var combined bytes.Buffer
@@ -382,6 +419,24 @@ func ApplyTestPatch(dir, patchContent string) error {
 		return fmt.Errorf("git apply test patch: %w: %s", err, stderr.String())
 	}
 	return nil
+}
+
+// pyenvPythonFromEnv extracts the pyenv Python binary path from extra env vars.
+// Returns empty string if not found.
+func pyenvPythonFromEnv(extraEnv []string) string {
+	for _, e := range extraEnv {
+		if strings.HasPrefix(e, "PATH=") {
+			pathVal := strings.TrimPrefix(e, "PATH=")
+			parts := strings.SplitN(pathVal, ":", 2)
+			if len(parts) > 0 {
+				candidate := filepath.Join(parts[0], "python3")
+				if _, err := os.Stat(candidate); err == nil {
+					return candidate
+				}
+			}
+		}
+	}
+	return ""
 }
 
 // ExtractPatch generates a unified diff of all changes in the working directory.

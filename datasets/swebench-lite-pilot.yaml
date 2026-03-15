@@ -64,6 +64,8 @@ tasks:
       (delete.tests.DeletionTests)", "test_large_delete_related (delete.tests.DeletionTests)", "test_m2m (delete.tests.DeletionTests)", "test_model_delete_returns_num_rows (delete.tests.DeletionTests)",
       "test_proxied_model_duplicate_queries (delete.tests.DeletionTests)", "test_queryset_delete_returns_num_rows (delete.tests.DeletionTests)", "test_relational_post_delete_signals_happen_before_parent_object
       (delete.tests.DeletionTests)"]'
+    repo: django/django
+    version: '3.0'
 - id: django__django-14999
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nRenameModel with db_table should be a noop.\nDescription\n\t\nA RenameModel operation that already has db_table defined must be a noop.\n\
     In Postgres, it drops and recreates foreign key constraints. In sqlite it recreates the table (as expected for a table renaming).\n\n\nMake the minimal code changes needed to fix the issue. All existing\
@@ -121,6 +123,8 @@ tasks:
       operation.", "test_run_sql_add_missing_semicolon_on_collect_sql (migrations.test_operations.OperationTests)", "#24098 - Tests no-op RunSQL operations.", "#23426 - RunSQL should accept parameters.",
       "#23426 - RunSQL should fail when a list of statements with an incorrect", "Tests the SeparateDatabaseAndState operation.", "A complex SeparateDatabaseAndState operation: Multiple operations both",
       "A field may be migrated from SmallAutoField to AutoField.", "A field may be migrated from SmallAutoField to BigAutoField."]'
+    repo: django/django
+    version: '4.1'
 - id: matplotlib__matplotlib-23913
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nlegend draggable as keyword\n<!--To help us understand and resolve your issue, please fill out the form to the best of your ability.-->\r\
     \n<!--You can feel free to delete the sections that do not apply.-->\r\n\r\n### Feature request\r\n\r\n**There is not keyword to make legend draggable at creation**\r\n\r\n<!--A short 1-2 sentences\
@@ -171,6 +175,8 @@ tasks:
       "lib/matplotlib/tests/test_legend.py::test_legend_face_edgecolor", "lib/matplotlib/tests/test_legend.py::test_legend_text_axes", "lib/matplotlib/tests/test_legend.py::test_handlerline2d", "lib/matplotlib/tests/test_legend.py::test_subfigure_legend",
       "lib/matplotlib/tests/test_legend.py::test_setting_alpha_keeps_polycollection_color", "lib/matplotlib/tests/test_legend.py::test_legend_markers_from_line2d", "lib/matplotlib/tests/test_legend.py::test_ncol_ncols[png]",
       "lib/matplotlib/tests/test_legend.py::test_ncol_ncols[pdf]"]'
+    repo: matplotlib/matplotlib
+    version: '3.6'
 - id: pallets__flask-4045
   prompt: 'Fix the following issue in this repository.
 
@@ -230,6 +236,8 @@ tasks:
       "tests/test_blueprints.py::test_template_filter", "tests/test_blueprints.py::test_add_template_filter", "tests/test_blueprints.py::test_template_filter_with_name", "tests/test_blueprints.py::test_add_template_filter_with_name",
       "tests/test_blueprints.py::test_template_test", "tests/test_blueprints.py::test_add_template_test", "tests/test_blueprints.py::test_template_test_with_name", "tests/test_blueprints.py::test_add_template_test_with_name",
       "tests/test_blueprints.py::test_template_global"]'
+    repo: pallets/flask
+    version: '2.0'
 - id: psf__requests-2674
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nurllib3 exceptions passing through requests API\nI don't know if it's a design goal of requests to hide urllib3's exceptions and wrap\
     \ them around requests.exceptions types.\n\n(If it's not IMHO it should be, but that's another discussion)\n\nIf it is, I have at least two of them passing through that I have to catch in addition to\
@@ -323,6 +331,8 @@ tasks:
       "test_requests.py::TestTimeout::test_connect_timeout", "test_requests.py::TestTimeout::test_total_timeout_connect", "test_requests.py::TestRedirects::test_requests_are_updated_each_time", "test_requests.py::test_data_argument_accepts_tuples",
       "test_requests.py::test_prepared_request_empty_copy", "test_requests.py::test_prepared_request_no_cookies_copy", "test_requests.py::test_prepared_request_complete_copy", "test_requests.py::test_prepare_unicode_url",
       "test_requests.py::test_urllib3_retries", "test_requests.py::test_vendor_aliases"]'
+    repo: psf/requests
+    version: '2.7'
 - id: pytest-dev__pytest-5221
   prompt: 'Fix the following issue in this repository.
 
@@ -411,6 +421,8 @@ tasks:
       "testing/python/fixtures.py::test_pytest_fixture_setup_and_post_finalizer_hook", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_module_auto[mark]", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_module_auto[autouse]",
       "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_with_native_fixtures", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_module", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_scopes_reordered",
       "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_same_scope_closer_root_first", "testing/python/fixtures.py::TestScopeOrdering::test_func_closure_all_scopes_complex", "testing/python/fixtures.py::TestScopeOrdering::test_multiple_packages"]'
+    repo: pytest-dev/pytest
+    version: '4.4'
 - id: scikit-learn__scikit-learn-13497
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nComparing string to array in _estimate_mi\nIn ``_estimate_mi`` there is ``discrete_features == 'auto'`` but discrete features can be\
     \ an array of indices or a boolean mask.\r\nThis will error in future versions of numpy.\r\nAlso this means we never test this function with discrete features != 'auto', it seems?\n\n\n## Hints\n\n\
@@ -436,6 +448,8 @@ tasks:
     pass_to_pass: '["sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_dd", "sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_cc", "sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_cd",
       "sklearn/feature_selection/tests/test_mutual_info.py::test_compute_mi_cd_unique_label", "sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_classif_discrete", "sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_regression",
       "sklearn/feature_selection/tests/test_mutual_info.py::test_mutual_info_classif_mixed"]'
+    repo: scikit-learn/scikit-learn
+    version: '0.21'
 - id: sphinx-doc__sphinx-7975
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nTwo sections called Symbols in index\nWhen using index entries with the following leading characters: _@_, _\xA3_, and _\u2190_ I get\
     \ two sections called _Symbols_ in the HTML output, the first containing all _@_ entries before \u201Dnormal\u201D words and the second containing _\xA3_ and _\u2190_ entries after the \u201Dnormal\u201D\
@@ -458,6 +472,8 @@ tasks:
     pass_to_pass: '["tests/test_environment_indexentries.py::test_create_pair_index", "tests/test_environment_indexentries.py::test_create_triple_index", "tests/test_environment_indexentries.py::test_create_see_index",
       "tests/test_environment_indexentries.py::test_create_seealso_index", "tests/test_environment_indexentries.py::test_create_main_index", "tests/test_environment_indexentries.py::test_create_index_with_name",
       "tests/test_environment_indexentries.py::test_create_index_by_key"]'
+    repo: sphinx-doc/sphinx
+    version: '3.2'
 - id: sympy__sympy-15345
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nmathematica_code gives wrong output with Max\nIf I run the code\r\n\r\n```\r\nx = symbols('x')\r\nmathematica_code(Max(x,2))\r\n```\r\
     \n\r\nthen I would expect the output `'Max[x,2]'` which is valid Mathematica code but instead I get `'Max(2, x)'` which is not valid Mathematica code.\n\n\n## Hints\n\nHi, I'm new (to the project and\
@@ -479,6 +495,8 @@ tasks:
       \ z]\"\n \n \n def test_Pow():\n"
     fail_to_pass: '["test_Function"]'
     pass_to_pass: '["test_Integer", "test_Rational", "test_Pow", "test_Mul", "test_constants", "test_containers", "test_Integral", "test_Derivative"]'
+    repo: sympy/sympy
+    version: '1.4'
 - id: sympy__sympy-16503
   prompt: "Fix the following issue in this repository.\n\n## Issue\n\nBad centering for Sum pretty print\n```\r\n>>> pprint(Sum(x, (x, 1, oo)) + 3)\r\n  \u221E\r\n ___\r\n \u2572\r\n  \u2572   x\r\n  \u2571\
     \     + 3\r\n \u2571\r\n \u203E\u203E\u203E\r\nx = 1\r\n```\r\n\r\nThe `x` and the `+ 3` should be aligned. I'm not sure if the `x` should be lower of if the `+ 3` should be higher. \n\n\n## Hints\n\
@@ -553,6 +571,8 @@ tasks:
       "test_issue_9877", "test_issue_13651", "test_pretty_primenu", "test_pretty_primeomega", "test_pretty_Mod", "test_issue_11801", "test_pretty_UnevaluatedExpr", "test_issue_10472", "test_MatrixElement_printing",
       "test_issue_12675", "test_MatrixSymbol_printing", "test_degree_printing", "test_vector_expr_pretty_printing", "test_pretty_print_tensor_expr", "test_pretty_print_tensor_partial_deriv", "test_issue_15560",
       "test_print_lerchphi", "test_issue_15583", "test_matrixSymbolBold", "test_center_accent"]'
+    repo: sympy/sympy
+    version: '1.5'
 defaults:
   timeout: 600s
   max_cells: 10
