@@ -170,6 +170,31 @@ func main() {
 		cellID := fmt.Sprintf("%s-%s-%d", cell.RepoID, cell.TaskID, time.Now().Unix())
 		cloneDir := filepath.Join(os.TempDir(), "intermix", cellID)
 
+		// 0. Pyenv: determine if we need a specific Python version
+		var pyenvEnvVars []string
+		if repoName := task.Metadata["repo"]; repoName != "" {
+			version := task.Metadata["version"]
+			pyVer := eval.LookupPythonVersion(repoName, version)
+			hostPy := "3.12" // current system Python
+			if pyVer != hostPy {
+				if eval.PyenvAvailable() && eval.PyenvVersionInstalled(pyVer) {
+					pyenvEnvVars = eval.PyenvEnv(pyVer)
+					fmt.Printf("pyenv: Python %s (via pyenv)\n", pyVer)
+				} else if eval.PyenvAvailable() {
+					fmt.Printf("pyenv: Python %s needed but not installed. Installing...\n", pyVer)
+					if err := eval.PyenvInstallVersion(pyVer); err != nil {
+						fmt.Printf("  PYENV INSTALL FAILED: %v\n", err)
+						fmt.Printf("  Falling back to system Python %s\n", hostPy)
+					} else {
+						pyenvEnvVars = eval.PyenvEnv(pyVer)
+						fmt.Printf("  Installed Python %s\n", pyVer)
+					}
+				} else {
+					fmt.Printf("pyenv: Python %s needed but pyenv not available (using system %s)\n", pyVer, hostPy)
+				}
+			}
+		}
+
 		// 1. Clone at base_commit
 		commit := task.Metadata["base_commit"]
 		if commit != "" {
@@ -193,10 +218,10 @@ func main() {
 		cloneDur := time.Since(start)
 		fmt.Printf("  Cloned in %v\n", cloneDur.Round(time.Second))
 
-		// 2. Setup
+		// 2. Setup (with pyenv env if needed)
 		if repo.Setup != "" {
 			fmt.Printf("Running setup...\n")
-			if err := eval.RunSetup(cloneDir, repo.Setup); err != nil {
+			if err := eval.RunSetupWithEnv(cloneDir, repo.Setup, pyenvEnvVars); err != nil {
 				fmt.Printf("  SETUP FAILED: %v\n", err)
 				cr := eval.ClassifyFromRunDetails(&eval.RunDetails{
 					CellID: cellID, Repo: cell.RepoID, Task: cell.TaskID,
@@ -246,7 +271,7 @@ func main() {
 		}
 		if valCmd != "" {
 			fmt.Printf("Validating: %s\n", valCmd)
-			vr := eval.RunValidation(cloneDir, valCmd)
+			vr := eval.RunValidationWithEnv(cloneDir, valCmd, pyenvEnvVars)
 			rd.ValidationPassed = vr.Passed
 			rd.ValidationOutput = vr.Output
 			fmt.Printf("  Validation: passed=%v, exit=%d\n", vr.Passed, vr.ExitCode)

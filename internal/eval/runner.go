@@ -102,8 +102,14 @@ func CloneRepoAt(url, destDir, commit string) error {
 	return nil
 }
 
-// RunSetup executes a setup command in the given directory with a 120s timeout.
+// RunSetup executes a setup command in the given directory with a 300s timeout.
 func RunSetup(dir, setupCmd string) error {
+	return RunSetupWithEnv(dir, setupCmd, nil)
+}
+
+// RunSetupWithEnv executes a setup command with optional extra environment variables.
+// Extra env vars (e.g., from pyenv) are prepended to the inherited environment.
+func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 	if setupCmd == "" {
 		return nil
 	}
@@ -112,6 +118,9 @@ func RunSetup(dir, setupCmd string) error {
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", setupCmd)
 	cmd.Dir = dir
+	if len(extraEnv) > 0 {
+		cmd.Env = append(extraEnv, os.Environ()...)
+	}
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
@@ -165,8 +174,13 @@ func SpawnSkaffen(dir, prompt, timeout string) *RunDetails {
 	return rd
 }
 
-// RunValidation executes a validation command in dir with a 120s timeout.
+// RunValidation executes a validation command in dir with a 300s timeout.
 func RunValidation(dir, validationCmd string) ValidationResult {
+	return RunValidationWithEnv(dir, validationCmd, nil)
+}
+
+// RunValidationWithEnv executes a validation command with optional extra environment variables.
+func RunValidationWithEnv(dir, validationCmd string, extraEnv []string) ValidationResult {
 	if validationCmd == "" {
 		return ValidationResult{Passed: true, Output: "no validation command configured"}
 	}
@@ -186,6 +200,9 @@ func RunValidation(dir, validationCmd string) ValidationResult {
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
+	if len(extraEnv) > 0 {
+		cmd.Env = append(extraEnv, os.Environ()...)
+	}
 
 	var combined bytes.Buffer
 	cmd.Stdout = &combined
