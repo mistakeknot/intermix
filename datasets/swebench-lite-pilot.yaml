@@ -6,11 +6,11 @@ repos:
 - id: matplotlib__matplotlib
   url: https://github.com/matplotlib/matplotlib
   language: python
-  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install numpy && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install 'numpy<2' 'pyparsing<3.1' && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
 - id: pallets__flask
   url: https://github.com/pallets/flask
   language: python
-  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install 'werkzeug<2.4' && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[dev]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
 - id: psf__requests
   url: https://github.com/psf/requests
   language: python
@@ -485,7 +485,7 @@ tasks:
   repos:
   - sympy__sympy
   difficulty: swe-bench
-  validation_cmd: .venv/bin/python -m pytest -xvs -k 'test_Function'
+  validation_cmd: .venv/bin/python -m pytest -xvs --ignore=bin -k 'test_Function'
   metadata:
     base_commit: 9ef28fba5b4d6d0168237c9c005a550e6dc27d81
     test_patch: "diff --git a/sympy/printing/tests/test_mathematica.py b/sympy/printing/tests/test_mathematica.py\n--- a/sympy/printing/tests/test_mathematica.py\n+++ b/sympy/printing/tests/test_mathematica.py\n\

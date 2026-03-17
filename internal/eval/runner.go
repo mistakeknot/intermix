@@ -122,7 +122,12 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 	// so we must handle both cases.
 	shellCmd := setupCmd
 	if len(extraEnv) > 0 {
-		pyBin := pyenvPythonFromEnv(extraEnv)
+		// Find the Python binary — check UV_PYTHON_PATH first (uv python),
+		// then fall back to pyenv PATH entry.
+		pyBin := uvPythonFromEnv(extraEnv)
+		if pyBin == "" {
+			pyBin = pyenvPythonFromEnv(extraEnv)
+		}
 		if pyBin != "" {
 			// Determine if uv supports this Python version (3.8+)
 			var pyVersion string
@@ -153,11 +158,30 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 		}
 	}
 
-	// Append auto-install of pytest + setuptools after the main setup.
-	// - pytest: needed by most SWE-bench validation commands
-	// - setuptools: provides pkg_resources (required by sphinx, older repos)
-	// Uses the venv's pip if available, falls back to uv pip.
-	shellCmd += " && (.venv/bin/pip install pytest setuptools 2>/dev/null || VIRTUAL_ENV=$PWD/.venv uv pip install pytest setuptools 2>/dev/null || true)"
+	// Pre-install setuptools into the venv BEFORE the main setup command.
+	// Old repos (pytest 4.x, sphinx 3.x, scikit-learn 0.x) import pkg_resources
+	// at setup.py/build time, so setuptools must be present before `pip install -e .`.
+	//
+	// Also add --no-build-isolation to editable installs so the build backend
+	// can see the venv's setuptools. Without this, uv creates a temporary isolated
+	// build env that lacks setuptools even if we pre-installed it.
+	if strings.Contains(shellCmd, "uv pip install -e") || strings.Contains(shellCmd, "pip install -e") {
+		// Insert setuptools install before the first editable install
+		for _, marker := range []string{"VIRTUAL_ENV=$PWD/.venv uv pip install -e", ".venv/bin/pip install -e"} {
+			if idx := strings.Index(shellCmd, marker); idx != -1 {
+				preInstall := "VIRTUAL_ENV=$PWD/.venv uv pip install setuptools pip wheel 2>/dev/null; "
+				shellCmd = shellCmd[:idx] + preInstall + shellCmd[idx:]
+				break
+			}
+		}
+		// Add --no-build-isolation to uv pip install -e so the build can see setuptools
+		shellCmd = strings.ReplaceAll(shellCmd,
+			"uv pip install -e",
+			"uv pip install --no-build-isolation -e")
+	}
+
+	// Append auto-install of pytest after the main setup (needed for validation).
+	shellCmd += " && (VIRTUAL_ENV=$PWD/.venv uv pip install pytest 2>/dev/null || .venv/bin/pip install pytest 2>/dev/null || true)"
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
@@ -417,14 +441,34 @@ func ApplyTestPatch(dir, patchContent string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "git", "apply", "--allow-empty", patchFile)
+	// Try --3way first for better merge handling when Skaffen modified the
+	// same files as the test patch. Falls back to plain apply on failure.
+	cmd := exec.CommandContext(ctx, "git", "apply", "--3way", "--allow-empty", patchFile)
 	cmd.Dir = dir
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("git apply test patch: %w: %s", err, stderr.String())
+		// --3way can fail if there's no common ancestor; fall back to plain apply
+		stderr.Reset()
+		cmd2 := exec.CommandContext(ctx, "git", "apply", "--allow-empty", patchFile)
+		cmd2.Dir = dir
+		cmd2.Stderr = &stderr
+		if err2 := cmd2.Run(); err2 != nil {
+			return fmt.Errorf("git apply test patch: %w: %s", err2, stderr.String())
+		}
 	}
 	return nil
+}
+
+// uvPythonFromEnv extracts the uv-managed Python binary path from extra env vars.
+// Returns empty string if UV_PYTHON_PATH is not set.
+func uvPythonFromEnv(extraEnv []string) string {
+	for _, e := range extraEnv {
+		if strings.HasPrefix(e, "UV_PYTHON_PATH=") {
+			return strings.TrimPrefix(e, "UV_PYTHON_PATH=")
+		}
+	}
+	return ""
 }
 
 // pyenvPythonFromEnv extracts the pyenv Python binary path from extra env vars.

@@ -163,7 +163,9 @@ func buildSWEBenchValidationCmd(inst SWEBenchInstance) string {
 			}
 		}
 		if useKFlag {
-			return "pytest -xvs -k '" + strings.Join(converted, " or ") + "'"
+			// --ignore=bin avoids collecting bin/test_executable.py (sympy)
+			// which matches broad -k patterns and fails on shebang checks
+			return "pytest -xvs --ignore=bin -k '" + strings.Join(converted, " or ") + "'"
 		}
 		return "pytest -xvs " + strings.Join(converted, " ")
 	}
