@@ -149,6 +149,21 @@ func buildSWEBenchValidationCmd(inst SWEBenchInstance) string {
 		json.Unmarshal([]byte(inst.FailToPass), &failToPass)
 	}
 
+	// Django uses its own test runner, not pytest.
+	// Convert unittest-style IDs to Django runtests.py format.
+	if inst.Repo == "django/django" && len(failToPass) > 0 {
+		var testLabels []string
+		for _, t := range failToPass {
+			label := convertToDjangoTestLabel(t)
+			if label != "" {
+				testLabels = append(testLabels, label)
+			}
+		}
+		if len(testLabels) > 0 {
+			return ".venv/bin/python tests/runtests.py --settings=test_sqlite " + strings.Join(testLabels, " ")
+		}
+	}
+
 	// For Python repos, run specific FAIL_TO_PASS tests if available
 	if len(failToPass) > 0 && inferLanguageFromRepo(inst.Repo) == "python" {
 		var converted []string
@@ -181,6 +196,25 @@ func buildSWEBenchValidationCmd(inst SWEBenchInstance) string {
 		return "go test ./..."
 	}
 	return "pytest -x -q"
+}
+
+// convertToDjangoTestLabel converts a SWE-bench test ID to Django runtests.py format.
+// Django's test runner uses dotted module paths: "admin_views.test_adminsite.SiteEachContextTest.test_available_apps"
+// Input formats:
+//   - unittest: "test_available_apps (admin_views.test_adminsite.SiteEachContextTest)"
+//   - dotted: "admin_views.test_adminsite.SiteEachContextTest.test_available_apps"
+func convertToDjangoTestLabel(testID string) string {
+	// Unittest format: "test_name (module.Class)"
+	if parenIdx := strings.Index(testID, " ("); parenIdx > 0 && strings.HasSuffix(testID, ")") {
+		testName := testID[:parenIdx]
+		moduleClass := testID[parenIdx+2 : len(testID)-1]
+		return moduleClass + "." + testName
+	}
+	// Already dotted format or bare name
+	if strings.Contains(testID, ".") {
+		return testID
+	}
+	return ""
 }
 
 // convertTestIDToPytest converts a test identifier to pytest format.
