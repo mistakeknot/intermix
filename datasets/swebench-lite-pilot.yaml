@@ -26,7 +26,7 @@ repos:
 - id: sphinx-doc__sphinx
   url: https://github.com/sphinx-doc/sphinx
   language: python
-  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[test]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
+  setup: uv venv .venv && VIRTUAL_ENV=$PWD/.venv uv pip install 'jinja2<3.1' && VIRTUAL_ENV=$PWD/.venv uv pip install -e '.[test]' || VIRTUAL_ENV=$PWD/.venv uv pip install -e .
 - id: sympy__sympy
   url: https://github.com/sympy/sympy
   language: python
@@ -485,7 +485,7 @@ tasks:
   repos:
   - sympy__sympy
   difficulty: swe-bench
-  validation_cmd: .venv/bin/python -m pytest -xvs --ignore=bin -k 'test_Function'
+  validation_cmd: .venv/bin/python -m pytest -xvs sympy/printing/tests/test_mathematica.py -k 'test_Function'
   metadata:
     base_commit: 9ef28fba5b4d6d0168237c9c005a550e6dc27d81
     test_patch: "diff --git a/sympy/printing/tests/test_mathematica.py b/sympy/printing/tests/test_mathematica.py\n--- a/sympy/printing/tests/test_mathematica.py\n+++ b/sympy/printing/tests/test_mathematica.py\n\

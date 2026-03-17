@@ -169,7 +169,7 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 		// Insert setuptools install before the first editable install
 		for _, marker := range []string{"VIRTUAL_ENV=$PWD/.venv uv pip install -e", ".venv/bin/pip install -e"} {
 			if idx := strings.Index(shellCmd, marker); idx != -1 {
-				preInstall := "VIRTUAL_ENV=$PWD/.venv uv pip install setuptools pip wheel 2>/dev/null; "
+				preInstall := "VIRTUAL_ENV=$PWD/.venv uv pip install 'setuptools<71' pip wheel 2>/dev/null; "
 				shellCmd = shellCmd[:idx] + preInstall + shellCmd[idx:]
 				break
 			}
@@ -180,8 +180,11 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 			"uv pip install --no-build-isolation -e")
 	}
 
-	// Append auto-install of pytest after the main setup (needed for validation).
-	shellCmd += " && (VIRTUAL_ENV=$PWD/.venv uv pip install pytest 2>/dev/null || .venv/bin/pip install pytest 2>/dev/null || true)"
+	// Append auto-install of pytest + setuptools after the main setup.
+	// setuptools must be re-installed AFTER editable install because some repos
+	// (pytest 4.x, sphinx 3.x) import pkg_resources at runtime and the editable
+	// install may have removed or not included it.
+	shellCmd += " && (VIRTUAL_ENV=$PWD/.venv uv pip install pytest 'setuptools<71' 2>/dev/null || .venv/bin/pip install pytest 'setuptools<71' 2>/dev/null || true)"
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", shellCmd)
 	cmd.Dir = dir
