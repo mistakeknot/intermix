@@ -3,3 +3,7 @@ intermix-mcp
 .intermix-run.json
 .intermix-manifest.json
 intermix.jsonl
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
