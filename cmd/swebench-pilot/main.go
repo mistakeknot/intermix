@@ -232,13 +232,11 @@ func runCell(idx, total int, manifest *eval.Manifest, repo *eval.Repo, task *eva
 	if valCmd == "" {
 		valCmd = eval.InferValidationCmd(cloneDir, repo.Language)
 	}
-	if valCmd != "" {
-		testCmd := valCmd
-		if strings.Contains(testCmd, ".venv/bin/") {
-			testCmd = "source .venv/bin/activate 2>/dev/null; " + testCmd
-		}
-		skaffenOpts = eval.SpawnSkaffenOpts{IterateMax: 3, TestCmd: testCmd}
-	}
+	// NOTE: iterate disabled — the test command runs BEFORE test_patch is applied,
+	// so it tests against old assertions, not the SWE-bench expected behavior.
+	// This causes over-fitting to existing tests and degrades patch quality.
+	// Re-enable when we can inject test_patch before Skaffen's iterate loop.
+	_ = valCmd // used later for harness validation
 
 	fmt.Printf("%s spawning Skaffen (timeout: %s, iterate: %d)...\n", prefix, timeout, skaffenOpts.IterateMax)
 	rd := eval.SpawnSkaffenWithOpts(cloneDir, task.Prompt, timeout, skaffenOpts)
