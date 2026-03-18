@@ -1,0 +1,310 @@
+{
+  "TotalCells": 10,
+  "SuccessCount": 8,
+  "FailureCount": 2,
+  "PassRate": 80,
+  "ByRepo": {
+    "django__django": {
+      "Total": 2,
+      "Success": 2,
+      "Failure": 0
+    },
+    "matplotlib__matplotlib": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "pallets__flask": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "psf__requests": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "pytest-dev__pytest": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "scikit-learn__scikit-learn": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sphinx-doc__sphinx": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "sympy__sympy": {
+      "Total": 2,
+      "Success": 2,
+      "Failure": 0
+    }
+  },
+  "ByTask": {
+    "django__django-11179": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "django__django-14999": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "matplotlib__matplotlib-23913": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "pallets__flask-4045": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "psf__requests-2674": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "pytest-dev__pytest-5221": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "scikit-learn__scikit-learn-13497": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sphinx-doc__sphinx-7975": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "sympy__sympy-15345": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "sympy__sympy-16503": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    }
+  },
+  "ByOutcome": {
+    "partial": 1,
+    "setup_failure": 1,
+    "success": 8
+  },
+  "FailureClusters": [
+    {
+      "Outcome": "setup_failure",
+      "Count": 1,
+      "Cells": [
+        "scikit-learn__scikit-learn:scikit-learn__scikit-learn-13497"
+      ],
+      "BeadID": ""
+    },
+    {
+      "Outcome": "partial",
+      "Count": 1,
+      "Cells": [
+        "pytest-dev__pytest:pytest-dev__pytest-5221"
+      ],
+      "BeadID": ""
+    }
+  ],
+  "Delta": null,
+  "Results": [
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-11179",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 133862,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 3599,
+      "input_tokens": 26,
+      "output_tokens": 3573,
+      "cache_creation_tokens": 116309,
+      "cache_read_tokens": 1129262,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-18T16:56:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "scikit-learn__scikit-learn",
+      "task": "scikit-learn__scikit-learn-13497",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "tool or MCP call failed",
+      "timestamp": "2026-03-18T16:56:36Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "psf__requests",
+      "task": "psf__requests-2674",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 183768,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 5678,
+      "input_tokens": 27,
+      "output_tokens": 5651,
+      "cache_creation_tokens": 70974,
+      "cache_read_tokens": 1568511,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-18T16:57:19Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14999",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 169518,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 5381,
+      "input_tokens": 29,
+      "output_tokens": 5352,
+      "cache_creation_tokens": 104531,
+      "cache_read_tokens": 1348658,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-18T17:00:12Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "matplotlib__matplotlib",
+      "task": "matplotlib__matplotlib-23913",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 226162,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 5611,
+      "input_tokens": 32,
+      "output_tokens": 5579,
+      "cache_creation_tokens": 89739,
+      "cache_read_tokens": 1594722,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-18T17:01:28Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-16503",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 517035,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 19331,
+      "input_tokens": 60,
+      "output_tokens": 19271,
+      "cache_creation_tokens": 94693,
+      "cache_read_tokens": 4406205,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-18T17:02:49Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-15345",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 94550,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 2702,
+      "input_tokens": 17,
+      "output_tokens": 2685,
+      "cache_creation_tokens": 60049,
+      "cache_read_tokens": 802500,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=true",
+      "timestamp": "2026-03-18T17:03:05Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sphinx-doc__sphinx",
+      "task": "sphinx-doc__sphinx-7975",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 172738,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 4280,
+      "input_tokens": 28,
+      "output_tokens": 4252,
+      "cache_creation_tokens": 112692,
+      "cache_read_tokens": 1416413,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=true",
+      "timestamp": "2026-03-18T17:03:09Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pytest-dev__pytest",
+      "task": "pytest-dev__pytest-5221",
+      "outcome": "partial",
+      "severity": "degraded",
+      "validation_passed": false,
+      "duration_ms": 103624,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 2377,
+      "input_tokens": 21,
+      "output_tokens": 2356,
+      "cache_creation_tokens": 60649,
+      "cache_read_tokens": 914087,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=false",
+      "failure_reason": "files changed but validation failed",
+      "timestamp": "2026-03-18T17:04:50Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pallets__flask",
+      "task": "pallets__flask-4045",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 381306,
+      "exit_code": 0,
+      "files_changed": 4,
+      "tokens_used": 12274,
+      "input_tokens": 66,
+      "output_tokens": 12208,
+      "cache_creation_tokens": 137072,
+      "cache_read_tokens": 3724080,
+      "llm_analysis": "Pilot run: exit=0, files=4, validation=true",
+      "timestamp": "2026-03-18T17:09:11Z"
+    }
+  ],
+  "Tokens": {
+    "total_input": 306,
+    "total_output": 60927,
+    "total_cache_creation": 846708,
+    "total_cache_read": 16904438,
+    "billing_tokens": 61233,
+    "effective_context": 17751452
+  }
+}

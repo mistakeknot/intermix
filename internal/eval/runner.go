@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -72,35 +73,25 @@ func CloneRepo(url, destDir string) error {
 	return CloneRepoAt(url, destDir, "")
 }
 
+// globalRepoCache is the shared repo cache, initialized lazily.
+var (
+	globalRepoCache     *RepoCache
+	globalRepoCacheOnce sync.Once
+)
+
+// GetRepoCache returns the global repo cache (created on first call).
+func GetRepoCache() *RepoCache {
+	globalRepoCacheOnce.Do(func() {
+		globalRepoCache = DefaultRepoCache()
+	})
+	return globalRepoCache
+}
+
 // CloneRepoAt clones a repo and optionally checks out a specific commit.
+// Uses a local bare-repo cache to avoid repeated GitHub fetches.
 func CloneRepoAt(url, destDir, commit string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
-
-	cloneArgs := []string{"clone"}
-	if commit == "" {
-		cloneArgs = append(cloneArgs, "--depth=1")
-	}
-	cloneArgs = append(cloneArgs, url, destDir)
-
-	cmd := exec.CommandContext(ctx, "git", cloneArgs...)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("git clone %s: %w: %s", url, err, stderr.String())
-	}
-
-	if commit != "" {
-		checkoutCmd := exec.CommandContext(ctx, "git", "checkout", commit)
-		checkoutCmd.Dir = destDir
-		var coStderr bytes.Buffer
-		checkoutCmd.Stderr = &coStderr
-		if err := checkoutCmd.Run(); err != nil {
-			return fmt.Errorf("git checkout %s: %w: %s", commit, err, coStderr.String())
-		}
-	}
-
-	return nil
+	cache := GetRepoCache()
+	return cache.CloneFrom(url, destDir, commit)
 }
 
 // RunSetup executes a setup command in the given directory with a 300s timeout.
