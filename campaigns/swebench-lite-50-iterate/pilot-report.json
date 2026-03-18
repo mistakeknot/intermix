@@ -1,0 +1,1027 @@
+{
+  "TotalCells": 50,
+  "SuccessCount": 2,
+  "FailureCount": 48,
+  "PassRate": 4,
+  "ByRepo": {
+    "django__django": {
+      "Total": 16,
+      "Success": 2,
+      "Failure": 14
+    },
+    "mwaskom__seaborn": {
+      "Total": 2,
+      "Success": 0,
+      "Failure": 2
+    },
+    "pallets__flask": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests": {
+      "Total": 2,
+      "Success": 0,
+      "Failure": 2
+    },
+    "pylint-dev__pylint": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pytest-dev__pytest": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy": {
+      "Total": 27,
+      "Success": 0,
+      "Failure": 27
+    }
+  },
+  "ByTask": {
+    "django__django-13447": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "django__django-13925": {
+      "Total": 1,
+      "Success": 1,
+      "Failure": 0
+    },
+    "django__django-14608": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-14672": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-14730": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-14855": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-15213": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-15400": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-15790": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-15819": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-16041": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-16046": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-16139": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-16408": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-16816": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "django__django-16820": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "mwaskom__seaborn-3190": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "mwaskom__seaborn-3407": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pallets__flask-5063": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests-1963": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "psf__requests-3362": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pylint-dev__pylint-7080": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "pytest-dev__pytest-7432": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-11400": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-12171": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-12236": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-12419": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-12454": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-13437": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-13480": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-13971": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-14024": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-14317": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-14817": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-15011": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-15308": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-15346": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-16503": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-16792": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-17022": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-18189": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-19007": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-20154": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-20442": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-20590": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-22005": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-22714": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-23262": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-24066": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    },
+    "sympy__sympy-24102": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    }
+  },
+  "ByOutcome": {
+    "setup_failure": 48,
+    "success": 2
+  },
+  "FailureClusters": [
+    {
+      "Outcome": "setup_failure",
+      "Count": 48,
+      "Cells": [
+        "django__django:django__django-14608",
+        "django__django:django__django-14672",
+        "django__django:django__django-14730",
+        "django__django:django__django-14855",
+        "django__django:django__django-15213",
+        "django__django:django__django-15400",
+        "django__django:django__django-15790",
+        "django__django:django__django-15819",
+        "django__django:django__django-16041",
+        "django__django:django__django-16046",
+        "django__django:django__django-16139",
+        "django__django:django__django-16408",
+        "django__django:django__django-16816",
+        "django__django:django__django-16820",
+        "mwaskom__seaborn:mwaskom__seaborn-3190",
+        "mwaskom__seaborn:mwaskom__seaborn-3407",
+        "pallets__flask:pallets__flask-5063",
+        "psf__requests:psf__requests-1963",
+        "psf__requests:psf__requests-3362",
+        "pylint-dev__pylint:pylint-dev__pylint-7080",
+        "pytest-dev__pytest:pytest-dev__pytest-7432",
+        "sympy__sympy:sympy__sympy-11400",
+        "sympy__sympy:sympy__sympy-12171",
+        "sympy__sympy:sympy__sympy-12236",
+        "sympy__sympy:sympy__sympy-12419",
+        "sympy__sympy:sympy__sympy-12454",
+        "sympy__sympy:sympy__sympy-13437",
+        "sympy__sympy:sympy__sympy-13480",
+        "sympy__sympy:sympy__sympy-13971",
+        "sympy__sympy:sympy__sympy-14024",
+        "sympy__sympy:sympy__sympy-14317",
+        "sympy__sympy:sympy__sympy-14817",
+        "sympy__sympy:sympy__sympy-15011",
+        "sympy__sympy:sympy__sympy-15308",
+        "sympy__sympy:sympy__sympy-15346",
+        "sympy__sympy:sympy__sympy-16503",
+        "sympy__sympy:sympy__sympy-16792",
+        "sympy__sympy:sympy__sympy-17022",
+        "sympy__sympy:sympy__sympy-18189",
+        "sympy__sympy:sympy__sympy-19007",
+        "sympy__sympy:sympy__sympy-20154",
+        "sympy__sympy:sympy__sympy-20442",
+        "sympy__sympy:sympy__sympy-20590",
+        "sympy__sympy:sympy__sympy-22005",
+        "sympy__sympy:sympy__sympy-22714",
+        "sympy__sympy:sympy__sympy-23262",
+        "sympy__sympy:sympy__sympy-24066",
+        "sympy__sympy:sympy__sympy-24102"
+      ],
+      "BeadID": ""
+    }
+  ],
+  "Delta": null,
+  "Results": [
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-13447",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 94231,
+      "exit_code": 0,
+      "files_changed": 2,
+      "tokens_used": 2079,
+      "input_tokens": 15,
+      "output_tokens": 2064,
+      "cache_creation_tokens": 57867,
+      "cache_read_tokens": 672171,
+      "llm_analysis": "Pilot run: exit=0, files=2, validation=true",
+      "timestamp": "2026-03-18T07:56:49Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-13925",
+      "outcome": "success",
+      "severity": "acceptable",
+      "validation_passed": true,
+      "duration_ms": 188273,
+      "exit_code": 0,
+      "files_changed": 3,
+      "tokens_used": 6233,
+      "input_tokens": 34,
+      "output_tokens": 6199,
+      "cache_creation_tokens": 79412,
+      "cache_read_tokens": 1351270,
+      "llm_analysis": "Pilot run: exit=0, files=3, validation=true",
+      "timestamp": "2026-03-18T08:00:15Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14608",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:15Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14672",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:15Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14730",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:16Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14855",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:16Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-15213",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:16Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-15400",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:16Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-15790",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:16Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-15819",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:17Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-16041",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:17Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-16046",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:17Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-16139",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:17Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-16408",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:17Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-16816",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:18Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-16820",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:18Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "mwaskom__seaborn",
+      "task": "mwaskom__seaborn-3190",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:18Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "mwaskom__seaborn",
+      "task": "mwaskom__seaborn-3407",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:18Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pallets__flask",
+      "task": "pallets__flask-5063",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:18Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "psf__requests",
+      "task": "psf__requests-1963",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:18Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "psf__requests",
+      "task": "psf__requests-3362",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:19Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pylint-dev__pylint",
+      "task": "pylint-dev__pylint-7080",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:19Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "pytest-dev__pytest",
+      "task": "pytest-dev__pytest-7432",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:19Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-11400",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:19Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-12171",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:19Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-12236",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:20Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-12419",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:20Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-12454",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:20Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-13437",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:20Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-13480",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:20Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-13971",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-14024",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-14317",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-14817",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-15011",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:21Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-15308",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:22Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-15346",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:22Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-16503",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:22Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-16792",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:22Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-17022",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:22Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-18189",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:23Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-19007",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:23Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-20154",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:23Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-20442",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:23Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-20590",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:23Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-22005",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:23Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-22714",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:24Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-23262",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:24Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-24066",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:24Z"
+    },
+    {
+      "type": "cell_result",
+      "repo": "sympy__sympy",
+      "task": "sympy__sympy-24102",
+      "outcome": "setup_failure",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-18T08:00:24Z"
+    }
+  ],
+  "Tokens": {
+    "total_input": 49,
+    "total_output": 8263,
+    "total_cache_creation": 137279,
+    "total_cache_read": 2023441,
+    "billing_tokens": 8312,
+    "effective_context": 2160769
+  }
+}
