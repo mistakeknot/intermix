@@ -204,7 +204,20 @@ func RunSetupWithEnv(dir, setupCmd string, extraEnv []string) error {
 // It returns a RunDetails populated with stdout, stderr, exit code, duration,
 // and file-change count. The timeout parameter should be a duration string
 // (e.g. "300s"); it defaults to 300s if empty.
+// SpawnSkaffenOpts configures optional behaviors for SpawnSkaffen.
+type SpawnSkaffenOpts struct {
+	// IterateMax enables the iterate-until-pass loop (0 = single-shot).
+	IterateMax int
+	// TestCmd is the shell command to run between iterate cycles.
+	// Required when IterateMax > 0.
+	TestCmd string
+}
+
 func SpawnSkaffen(dir, prompt, timeout string) *RunDetails {
+	return SpawnSkaffenWithOpts(dir, prompt, timeout, SpawnSkaffenOpts{})
+}
+
+func SpawnSkaffenWithOpts(dir, prompt, timeout string, opts SpawnSkaffenOpts) *RunDetails {
 	dur := 300 * time.Second
 	if timeout != "" {
 		if parsed, err := time.ParseDuration(timeout); err == nil {
@@ -215,7 +228,11 @@ func SpawnSkaffen(dir, prompt, timeout string) *RunDetails {
 	ctx, cancel := context.WithTimeout(context.Background(), dur)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "skaffen", "-mode", "print", "-p", prompt)
+	args := []string{"-mode", "print", "-p", prompt}
+	if opts.IterateMax > 0 && opts.TestCmd != "" {
+		args = append(args, "-iterate", fmt.Sprintf("%d", opts.IterateMax), "-test-cmd", opts.TestCmd)
+	}
+	cmd := exec.CommandContext(ctx, "skaffen", args...)
 	cmd.Dir = dir
 
 	var stdout, stderr bytes.Buffer

@@ -258,8 +258,26 @@ func main() {
 		if repo.SkaffenConfig.Timeout != "" {
 			timeout = repo.SkaffenConfig.Timeout
 		}
-		fmt.Printf("Spawning Skaffen (timeout: %s)...\n", timeout)
-		rd := eval.SpawnSkaffen(cloneDir, task.Prompt, timeout)
+		// Build iterate options: if we have a validation command, use --iterate
+		// to let Skaffen run tests and self-correct after patching.
+		var skaffenOpts eval.SpawnSkaffenOpts
+		valCmd := task.ValidationCmd
+		if valCmd == "" {
+			valCmd = eval.InferValidationCmd(cloneDir, repo.Language)
+		}
+		if valCmd != "" {
+			// Wrap validation command with venv activation if .venv exists
+			testCmd := valCmd
+			if strings.Contains(testCmd, ".venv/bin/") {
+				// Already uses .venv paths — activate for safety
+				testCmd = "source .venv/bin/activate 2>/dev/null; " + testCmd
+			}
+			skaffenOpts = eval.SpawnSkaffenOpts{IterateMax: 3, TestCmd: testCmd}
+			fmt.Printf("Spawning Skaffen (timeout: %s, iterate: 3, test: %s)...\n", timeout, valCmd[:min(80, len(valCmd))])
+		} else {
+			fmt.Printf("Spawning Skaffen (timeout: %s)...\n", timeout)
+		}
+		rd := eval.SpawnSkaffenWithOpts(cloneDir, task.Prompt, timeout, skaffenOpts)
 		rd.CellID = cellID
 		rd.Repo = cell.RepoID
 		rd.Task = cell.TaskID
@@ -282,8 +300,7 @@ func main() {
 			}
 		}
 
-		// 4. Validate
-		valCmd := task.ValidationCmd
+		// 4. Validate (valCmd already resolved above for iterate)
 		if valCmd == "" {
 			valCmd = eval.InferValidationCmd(cloneDir, repo.Language)
 		}
