@@ -298,6 +298,8 @@ func TestParseSkaffenTokens(t *testing.T) {
 		{"basic", "[1 turns, 37 in / 9186 out tokens]", 37, 9186, 0, 0},
 		{"with cache", "[1 turns, 15 in / 6 out tokens, 3400 cache_read / 1200 cache_create]", 15, 6, 3400, 1200},
 		{"embedded", "text\n[2 turns, 100 in / 500 out tokens]\nmore", 100, 500, 0, 0},
+		{"iteration format", "[1 iteration(s), 3 in / 12 out tokens, 0 cache_read / 80385 cache_create]", 3, 12, 0, 80385},
+		{"iteration with cache", "[5 iteration(s), 200 in / 3000 out tokens, 50000 cache_read / 10000 cache_create]", 200, 3000, 50000, 10000},
 		{"no match", "no token info here", 0, 0, 0, 0},
 	}
 	for _, tc := range tests {

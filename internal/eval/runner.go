@@ -16,29 +16,30 @@ import (
 
 // RunDetails captures the full result of executing a cell (clone + skaffen + validation).
 type RunDetails struct {
-	CellID               string `json:"cell_id"`
-	Repo                 string `json:"repo"`
-	Task                 string `json:"task"`
-	ExitCode             int    `json:"exit_code"`
-	DurationMs           int64  `json:"duration_ms"`
-	Stdout               string `json:"stdout"`
-	Stderr               string `json:"stderr"`
-	FilesChanged         int    `json:"files_changed"`
-	ValidationPassed     bool   `json:"validation_passed"`
-	ValidationOutput     string `json:"validation_output"`
-	CloneDir             string `json:"clone_dir"`
-	Patch                string `json:"patch,omitempty"`
-	InputTokens          int    `json:"input_tokens,omitempty"`
-	OutputTokens         int    `json:"output_tokens,omitempty"`
-	CacheCreationTokens  int    `json:"cache_creation_tokens,omitempty"`
-	CacheReadTokens      int    `json:"cache_read_tokens,omitempty"`
+	CellID              string `json:"cell_id"`
+	Repo                string `json:"repo"`
+	Task                string `json:"task"`
+	ExitCode            int    `json:"exit_code"`
+	DurationMs          int64  `json:"duration_ms"`
+	Stdout              string `json:"stdout"`
+	Stderr              string `json:"stderr"`
+	FilesChanged        int    `json:"files_changed"`
+	ValidationPassed    bool   `json:"validation_passed"`
+	ValidationOutput    string `json:"validation_output"`
+	CloneDir            string `json:"clone_dir"`
+	Patch               string `json:"patch,omitempty"`
+	InputTokens         int    `json:"input_tokens,omitempty"`
+	OutputTokens        int    `json:"output_tokens,omitempty"`
+	CacheCreationTokens int    `json:"cache_creation_tokens,omitempty"`
+	CacheReadTokens     int    `json:"cache_read_tokens,omitempty"`
 }
 
 // parseSkaffenTokens extracts token usage from Skaffen's stderr/stdout output.
 // Matches lines like:
-//   [1 turns, 15 in / 6 out tokens]
-//   [1 turns, 15 in / 6 out tokens, 3400 cache_read / 1200 cache_create]
-var skaffenTokenRe = regexp.MustCompile(`\[(\d+) turns?, (\d+) in / (\d+) out tokens(?:, (\d+) cache_read / (\d+) cache_create)?\]`)
+//
+//	[1 turns, 15 in / 6 out tokens]
+//	[1 turns, 15 in / 6 out tokens, 3400 cache_read / 1200 cache_create]
+var skaffenTokenRe = regexp.MustCompile(`\[(\d+) (?:turns?|iteration\(s\)), (\d+) in / (\d+) out tokens(?:, (\d+) cache_read / (\d+) cache_create)?\]`)
 
 // ParseSkaffenTokens extracts token counts from output text.
 // Populates the token fields on rd in-place.
@@ -569,7 +570,7 @@ func BuildSkaffenCommand(prompt string) []string {
 
 // BuildSkaffenShellCommand returns a shell-safe command string for use with
 // tmux send-keys. The prompt is single-quoted with internal single quotes
-// escaped as '\'' (end quote, literal quote, start quote).
+// escaped as '\” (end quote, literal quote, start quote).
 func BuildSkaffenShellCommand(prompt string) string {
 	collapsed := strings.Join(strings.Fields(prompt), " ")
 	// Shell-escape: replace ' with '\'' for safe single-quoting
