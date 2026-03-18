@@ -1,6 +1,6 @@
 {
   "name": "intermix",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Cross-repo matrix evaluation harness — run Skaffen against unfamiliar codebases, classify outcomes, track failure patterns.",
   "author": { "name": "mistakeknot" },
   "license": "MIT",
