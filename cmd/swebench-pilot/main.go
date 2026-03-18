@@ -222,7 +222,15 @@ func runCell(idx, total int, manifest *eval.Manifest, repo *eval.Repo, task *eva
 		}
 	}
 
-	// 3. Spawn Skaffen with iterate-until-pass
+	// 3. Apply test_patch BEFORE spawning Skaffen so the iterate loop
+	// tests against the correct SWE-bench assertions (fail_to_pass tests).
+	if testPatch := task.Metadata["test_patch"]; testPatch != "" {
+		if err := eval.ApplyTestPatch(cloneDir, testPatch); err != nil {
+			fmt.Printf("%s WARNING: test_patch failed: %v\n", prefix, err)
+		}
+	}
+
+	// 4. Spawn Skaffen with iterate-until-pass
 	timeout := manifest.Defaults.Timeout
 	if repo.SkaffenConfig.Timeout != "" {
 		timeout = repo.SkaffenConfig.Timeout
@@ -232,11 +240,13 @@ func runCell(idx, total int, manifest *eval.Manifest, repo *eval.Repo, task *eva
 	if valCmd == "" {
 		valCmd = eval.InferValidationCmd(cloneDir, repo.Language)
 	}
-	// NOTE: iterate disabled — the test command runs BEFORE test_patch is applied,
-	// so it tests against old assertions, not the SWE-bench expected behavior.
-	// This causes over-fitting to existing tests and degrades patch quality.
-	// Re-enable when we can inject test_patch before Skaffen's iterate loop.
-	_ = valCmd // used later for harness validation
+	if valCmd != "" {
+		testCmd := valCmd
+		if strings.Contains(testCmd, ".venv/bin/") {
+			testCmd = "source .venv/bin/activate 2>/dev/null; " + testCmd
+		}
+		skaffenOpts = eval.SpawnSkaffenOpts{IterateMax: 3, TestCmd: testCmd}
+	}
 
 	fmt.Printf("%s spawning Skaffen (timeout: %s, iterate: %d)...\n", prefix, timeout, skaffenOpts.IterateMax)
 	rd := eval.SpawnSkaffenWithOpts(cloneDir, task.Prompt, timeout, skaffenOpts)
@@ -247,18 +257,11 @@ func runCell(idx, total int, manifest *eval.Manifest, repo *eval.Repo, task *eva
 	fmt.Printf("%s skaffen done: exit=%d, %ds, files=%d, tokens=%d/%d\n",
 		prefix, rd.ExitCode, rd.DurationMs/1000, rd.FilesChanged, rd.InputTokens, rd.OutputTokens)
 
-	// 3b. Extract patch
+	// 4b. Extract patch (after Skaffen, before validation)
 	patch, _ := eval.ExtractPatch(cloneDir)
 	rd.Patch = patch
 
-	// 3c. Apply test_patch
-	if testPatch := task.Metadata["test_patch"]; testPatch != "" {
-		if err := eval.ApplyTestPatch(cloneDir, testPatch); err != nil {
-			fmt.Printf("%s WARNING: test_patch failed: %v\n", prefix, err)
-		}
-	}
-
-	// 4. Validate
+	// 5. Validate (same test_patch already applied, same valCmd)
 	if valCmd != "" {
 		vr := eval.RunValidationWithEnv(cloneDir, valCmd, pythonEnvVars)
 		rd.ValidationPassed = vr.Passed
