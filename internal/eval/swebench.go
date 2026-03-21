@@ -10,14 +10,14 @@ import (
 // SWEBenchInstance represents a single SWE-bench task instance.
 type SWEBenchInstance struct {
 	InstanceID       string `json:"instance_id"`
-	Repo             string `json:"repo"`             // e.g. "django/django"
-	BaseCommit       string `json:"base_commit"`      // commit SHA to checkout
+	Repo             string `json:"repo"`              // e.g. "django/django"
+	BaseCommit       string `json:"base_commit"`       // commit SHA to checkout
 	ProblemStatement string `json:"problem_statement"` // issue description
-	HintsText        string `json:"hints_text"`       // optional hints
-	TestPatch        string `json:"test_patch"`       // patch that adds/modifies tests
-	Patch            string `json:"patch"`            // gold patch (for comparison only)
-	FailToPass       string `json:"FAIL_TO_PASS"`     // JSON array of test IDs that should pass after fix
-	PassToPass       string `json:"PASS_TO_PASS"`     // JSON array of test IDs that must still pass
+	HintsText        string `json:"hints_text"`        // optional hints
+	TestPatch        string `json:"test_patch"`        // patch that adds/modifies tests
+	Patch            string `json:"patch"`             // gold patch (for comparison only)
+	FailToPass       string `json:"FAIL_TO_PASS"`      // JSON array of test IDs that should pass after fix
+	PassToPass       string `json:"PASS_TO_PASS"`      // JSON array of test IDs that must still pass
 	Version          string `json:"version,omitempty"`
 }
 
@@ -87,10 +87,10 @@ func SWEBenchToManifest(instances []SWEBenchInstance) *Manifest {
 		repoID := strings.ReplaceAll(inst.Repo, "/", "__")
 		prompt := buildSWEBenchPrompt(inst)
 		tasks = append(tasks, Task{
-			ID:     inst.InstanceID,
-			Prompt: prompt,
-			Repos:  []string{repoID},
-			Difficulty: "swe-bench",
+			ID:            inst.InstanceID,
+			Prompt:        prompt,
+			Repos:         []string{repoID},
+			Difficulty:    "swe-bench",
 			ValidationCmd: buildSWEBenchValidationCmd(inst),
 			Metadata: map[string]string{
 				"base_commit":  inst.BaseCommit,
@@ -107,8 +107,8 @@ func SWEBenchToManifest(instances []SWEBenchInstance) *Manifest {
 		Repos: repos,
 		Tasks: tasks,
 		Defaults: Defaults{
-			Timeout:               "900s",
-			MaxCells:              len(instances),
+			Timeout:                "900s",
+			MaxCells:               len(instances),
 			MaxConsecutiveFailures: len(instances), // don't circuit-break on bench runs
 		},
 	}
@@ -124,6 +124,32 @@ func buildSWEBenchPrompt(inst SWEBenchInstance) string {
 		b.WriteString("\n\n## Hints\n\n")
 		b.WriteString(inst.HintsText)
 	}
+
+	// Inject fail_to_pass test names so agent knows which tests to target
+	var failTests []string
+	if inst.FailToPass != "" {
+		json.Unmarshal([]byte(inst.FailToPass), &failTests)
+	}
+	if len(failTests) > 0 {
+		b.WriteString("\n\n## Tests That Must Pass After Fix\n\n")
+		b.WriteString("The following tests currently fail and must pass after your fix:\n")
+		for _, t := range failTests {
+			b.WriteString("- `")
+			b.WriteString(t)
+			b.WriteString("`\n")
+		}
+	}
+
+	// Inject test_patch so agent sees expected behavior
+	if inst.TestPatch != "" {
+		b.WriteString("\n\n## Test Patch (Expected Behavior)\n\n")
+		b.WriteString("The following test changes have been applied to the repo. ")
+		b.WriteString("Study them to understand the expected behavior your fix must produce:\n\n")
+		b.WriteString("```diff\n")
+		b.WriteString(inst.TestPatch)
+		b.WriteString("\n```\n")
+	}
+
 	b.WriteString("\n\nMake the minimal code changes needed to fix the issue. ")
 	b.WriteString("All existing tests must still pass after your fix.")
 	return b.String()
