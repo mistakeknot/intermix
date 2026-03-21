@@ -245,7 +245,7 @@ func runCell(idx, total int, manifest *eval.Manifest, repo *eval.Repo, task *eva
 		if strings.Contains(testCmd, ".venv/bin/") {
 			testCmd = "source .venv/bin/activate 2>/dev/null; " + testCmd
 		}
-		skaffenOpts = eval.SpawnSkaffenOpts{IterateMax: 3, TestCmd: testCmd}
+		skaffenOpts = eval.SpawnSkaffenOpts{IterateMax: 5, TestCmd: testCmd}
 	}
 
 	fmt.Printf("%s spawning Skaffen (timeout: %s, iterate: %d)...\n", prefix, timeout, skaffenOpts.IterateMax)
