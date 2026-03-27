@@ -82,8 +82,8 @@ func TestParseBeadIDFromOutput(t *testing.T) {
 	}{
 		{
 			name:     "standard format",
-			input:    "✓ Created issue: Demarch-abc1 — Stress test failure: chi/add-test",
-			expected: "Demarch-abc1",
+			input:    "✓ Created issue: Sylveste-abc1 — Stress test failure: chi/add-test",
+			expected: "Sylveste-abc1",
 		},
 		{
 			name:     "no marker",
@@ -92,13 +92,13 @@ func TestParseBeadIDFromOutput(t *testing.T) {
 		},
 		{
 			name:     "trailing newline",
-			input:    "✓ Created issue: Demarch-xyz9 — some title\n",
-			expected: "Demarch-xyz9",
+			input:    "✓ Created issue: Sylveste-xyz9 — some title\n",
+			expected: "Sylveste-xyz9",
 		},
 		{
 			name:     "no space after ID",
-			input:    "Created issue: Demarch-9z2f",
-			expected: "Demarch-9z2f",
+			input:    "Created issue: Sylveste-9z2f",
+			expected: "Sylveste-9z2f",
 		},
 		{
 			name:     "empty output",

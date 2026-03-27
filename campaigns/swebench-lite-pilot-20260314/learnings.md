@@ -1,6 +1,6 @@
 # SWE-bench Lite Pilot — 10 Instances (2026-03-14)
 
-**Bead:** Demarch-pr33
+**Bead:** Sylveste-pr33
 **Pass Rate:** 1/10 (10%)
 **Total Runtime:** ~35 minutes
 **Total Tokens:** 56K output, 10.8M effective context (mostly cache reads)
