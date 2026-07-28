@@ -7,3 +7,5 @@ intermix.jsonl
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+# A 0600 credential. Never commit: 7 repos already carry one in history.
+.beads/.beads-credential-key
