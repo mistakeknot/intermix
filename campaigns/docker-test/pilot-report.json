@@ -1,0 +1,58 @@
+{
+  "TotalCells": 1,
+  "SuccessCount": 0,
+  "FailureCount": 1,
+  "PassRate": 0,
+  "ByRepo": {
+    "django__django": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    }
+  },
+  "ByTask": {
+    "django__django-14999": {
+      "Total": 1,
+      "Success": 0,
+      "Failure": 1
+    }
+  },
+  "ByOutcome": {
+    "no_progress": 1
+  },
+  "FailureClusters": [
+    {
+      "Outcome": "no_progress",
+      "Count": 1,
+      "Cells": [
+        "django__django:django__django-14999"
+      ],
+      "BeadID": ""
+    }
+  ],
+  "Delta": null,
+  "Results": [
+    {
+      "type": "cell_result",
+      "repo": "django__django",
+      "task": "django__django-14999",
+      "outcome": "no_progress",
+      "severity": "critical",
+      "validation_passed": false,
+      "duration_ms": 0,
+      "exit_code": -1,
+      "files_changed": 0,
+      "llm_analysis": "Docker pilot (py3.9): exit=-1, files=0, validation=false",
+      "failure_reason": "no files changed and validation failed",
+      "timestamp": "2026-03-15T08:11:09Z"
+    }
+  ],
+  "Tokens": {
+    "total_input": 0,
+    "total_output": 0,
+    "total_cache_creation": 0,
+    "total_cache_read": 0,
+    "billing_tokens": 0,
+    "effective_context": 0
+  }
+}

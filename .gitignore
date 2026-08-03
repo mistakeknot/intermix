@@ -9,3 +9,15 @@ intermix.jsonl
 *.db
 # A 0600 credential. Never commit: 7 repos already carry one in history.
 .beads/.beads-credential-key
+
+# The swebench pilot binary, same class as bin/intermix-mcp above: a 5.9M Go
+# build product that rebuilds from source. Two paths because it gets built to
+# both, exactly like intermix-mcp.
+bin/swebench-pilot
+swebench-pilot
+
+# Quality-gate output written by review agents. Machine-generated commentary
+# about the code, not the code; Intercom and Sylveste already ignore it and this
+# repo is the one that did not, which is the whole reason it showed up as work
+# needing a human.
+.clavain/
