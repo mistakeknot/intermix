@@ -1,4 +1,12 @@
 #!/usr/bin/env sh
+# --- BEGIN SHARED PRE-COMMIT DISPATCHER ---
+# Added by dotfiles/cloud/install-hooks.sh, ABOVE the block below, which is
+# left exactly as its own tool wrote it. bd preserves content outside its
+# own markers across installs, so this survives `bd hooks install`.
+if [ -x "$HOME/projects/dotfiles/cloud/pre-commit.sh" ]; then
+  "$HOME/projects/dotfiles/cloud/pre-commit.sh" "$@" || exit $?
+fi
+# --- END SHARED PRE-COMMIT DISPATCHER ---
 # --- BEGIN BEADS INTEGRATION v0.60.0 ---
 # This section is managed by beads. Do not remove these markers.
 if command -v bd >/dev/null 2>&1; then
