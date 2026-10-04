@@ -63,7 +63,7 @@ func CreateDebugBead(cr CellResult, parentBeadID, evidenceExcerpt, paneCapture s
 		return ""
 	}
 
-	// Parse bead ID from output: "Created issue: Sylveste-xxxx — ..."
+	// Parse bead ID from output: "Created issue: <bead-id> — ..."
 	beadID := parseBeadIDFromOutput(string(out))
 	if beadID == "" {
 		return ""
@@ -137,7 +137,7 @@ func severityToPriority(severity string) string {
 }
 
 func parseBeadIDFromOutput(output string) string {
-	// Output format: "Created issue: Sylveste-xxxx — ..."
+	// Output format: "Created issue: <bead-id> — ..."
 	const marker = "Created issue: "
 	idx := strings.Index(output, marker)
 	if idx < 0 {
