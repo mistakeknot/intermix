@@ -21,3 +21,6 @@ swebench-pilot
 # repo is the one that did not, which is the whole reason it showed up as work
 # needing a human.
 .clavain/
+
+# Agent working state
+.beads/
